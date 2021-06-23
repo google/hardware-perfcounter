@@ -1,11 +1,21 @@
 cmake_minimum_required(VERSION 3.13...3.20)
 
+#-------------------------------------------------------------------------------
+# Overall project settings
+#-------------------------------------------------------------------------------
+
 project(HardwarePerfCounter LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(HPC_SOURCE_ROOT "${PROJECT_SOURCE_DIR}")
+
+#-------------------------------------------------------------------------------
+# CMake definitions
+#-------------------------------------------------------------------------------
 
 set(HPC_DEFAULT_BUILD_TYPE "Release")
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -16,6 +26,16 @@ endif()
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+#-------------------------------------------------------------------------------
+# Overall compilation controls
+#-------------------------------------------------------------------------------
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_executable(perfcounter main.c)
+
+#-------------------------------------------------------------------------------
+# Utility tools
+#-------------------------------------------------------------------------------
+
+add_subdirectory(scripts)
