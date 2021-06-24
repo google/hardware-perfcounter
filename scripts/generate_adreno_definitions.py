@@ -116,7 +116,7 @@ def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
   element_to_group_name_map = {}
 
   for enum in root.findall("nouveau:enum", ADRENO_XML_NS):
-    enum_name = enum.get("name")
+    enum_name = enum.get("name", "")
     if not enum_name.endswith("perfcounter_select"):
       continue
     if not enum_name.startswith(series):
@@ -138,7 +138,7 @@ def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
 
     for case in enum.findall("nouveau:value", ADRENO_XML_NS):
       value = int(case.get("value"))
-      symbol = case.get("name")
+      symbol = case.get("name", "")
       # Drop the leading "PERF_" prefix if exists
       if symbol.startswith("PERF_"):
         symbol = symbol[len("PERF_"):]
