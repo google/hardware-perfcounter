@@ -6,7 +6,7 @@ import re
 
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Dict
+from typing import Dict, Tuple
 
 # Known acronyms that should be kept as all capitals
 ADRENO_ACRONYMS = ["ALU", "EFU", "GPR"]
@@ -80,12 +80,52 @@ class AdrenoPerSeriesDefinition:
         value = case.value + ADRENO_MAX_COUNTER_COUNT_PER_GROUP * group_id
         cases.append(f"// {full_group_name}: {case.name}")
         cases.append(
-            ADRENO_C_ENUM_CASE_TEMPALTE.format(series=self.series,
+            ADRENO_C_ENUM_CASE_TEMPALTE.format(series=self.series.upper(),
                                                group=group_name,
                                                symbol=case.symbol,
                                                value=value))
     return ADRENO_C_ENUM_TEMPALTE.format(series=self.series.lower(),
                                          cases="\n  ".join(cases))
+
+
+@dataclass
+class AdrenoAllSeriesDefinition:
+  all_series: Tuple[AdrenoPerSeriesDefinition]
+
+  def get_common_perfcounters(self):
+    """Gets a "common" series containing perfcounters available to all series."""
+    if len(self.all_series) == 0:
+      return AdrenoPerSeriesDefinition("common", {})
+
+    common_groups = {}
+
+    for candidate_group_name, candidate_group in self.all_series[
+        0].groups.items():
+      # Skip this entire group if it's missing in some GPU series.
+      if not all([
+          series.groups.get(candidate_group_name)
+          for series in self.all_series[1:]
+      ]):
+        continue
+
+      common_counters = {}
+      for candidate_counter_value, candidate_counter in candidate_group.items():
+        is_common_counter = True
+        # Scan through all the other series to see whether their groups
+        # contains the same counter.
+        for series in self.all_series[1:]:
+          group = series.groups[candidate_group_name]
+          counter = group.get(candidate_counter_value)
+          if (counter is None) or (counter != candidate_counter):
+            is_common_counter = False
+            break
+
+        if is_common_counter:
+          common_counters[candidate_counter_value] = candidate_counter
+
+      common_groups[candidate_group_name] = common_counters
+
+    return AdrenoPerSeriesDefinition("common", common_groups)
 
 
 def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
@@ -221,6 +261,14 @@ def main(args):
   a6xx_c_header = os.path.join(args.output,
                                a6xx_definition.series.lower() + ".h")
   update_header_file(a6xx_c_header, a6xx_enum)
+
+  # Generate a header containing counters common to all known series
+  common_definition = AdrenoAllSeriesDefinition(
+      (a5xx_definition, a6xx_definition)).get_common_perfcounters()
+  common_enum = common_definition.get_all_perfcounters_as_one_enum()
+  common_c_header = os.path.join(args.output,
+                                 common_definition.series.lower() + ".h")
+  update_header_file(common_c_header, common_enum)
 
 
 if __name__ == "__main__":
