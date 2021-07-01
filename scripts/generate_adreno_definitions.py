@@ -272,15 +272,11 @@ def parse_arguments():
       type=check_file_path,
       required=True,
       help="Specify the XML file path containing Adreno A6xx definitions")
-  parser.add_argument("--header_dir",
-                      metavar="<c-header-directory>",
+  parser.add_argument("-o",
+                      "--output",
+                      metavar="<autogen-output-directory>",
                       required=True,
-                      help="Specify the directory for generated C header files")
-  parser.add_argument(
-      "--lib_dir",
-      metavar="<c-library-directory>",
-      required=True,
-      help="Specify the directory for generated C library files")
+                      help="Specify the directory for generated files")
   args = parser.parse_args()
 
   return args
@@ -289,12 +285,12 @@ def parse_arguments():
 def main(args):
   a5xx_definition = parse_xml_file(args.a5xx_xml)
   a5xx_enum = a5xx_definition.get_all_perfcounters_as_one_enum()
-  a5xx_c_header = os.path.join(args.header_dir, a5xx_definition.series + ".h")
+  a5xx_c_header = os.path.join(args.output, a5xx_definition.series + ".h")
   update_generated_file(a5xx_c_header, a5xx_enum)
 
   a6xx_definition = parse_xml_file(args.a6xx_xml)
   a6xx_enum = a6xx_definition.get_all_perfcounters_as_one_enum()
-  a6xx_c_header = os.path.join(args.header_dir, a6xx_definition.series + ".h")
+  a6xx_c_header = os.path.join(args.output, a6xx_definition.series + ".h")
   update_generated_file(a6xx_c_header, a6xx_enum)
 
   # Generate files containing counters common to all known series
@@ -302,12 +298,11 @@ def main(args):
 
   common_definition = all_series.get_common_series()
   common_enum = common_definition.get_all_perfcounters_as_one_enum()
-  common_c_header = os.path.join(args.header_dir,
-                                 common_definition.series + ".h")
+  common_c_header = os.path.join(args.output, common_definition.series + ".h")
   update_generated_file(common_c_header, common_enum)
 
   functions = all_series.get_perfcounter_enum_value_to_selector_conversion()
-  common_c_lib = os.path.join(args.lib_dir, common_definition.series + ".c")
+  common_c_lib = os.path.join(args.output, common_definition.series + ".c")
   update_generated_file(common_c_lib, functions)
 
 
