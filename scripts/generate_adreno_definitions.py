@@ -44,23 +44,24 @@ ADRENO_C_ENUM_CASE_TEMPALTE = "HPC_GPU_ADRENO_{series}_{group}_{symbol} = {value
 @dataclass
 class AdrenoPerfCounter:
   """A data class containing one Adreno perf counter."""
-  name: str
-  symbol: str
-  value: int
+  name: str  # Perfcounter name
+  symbol: str  # Perfcounter C enum symbol
+  selector: int  # Perfcounter selector ID
 
 
 @dataclass
 class AdrenoPerSeriesDefinition:
   """A data class containing all performance counters for one Andreo series."""
   series: str
-  groups: Dict[str, Dict[int, AdrenoPerfCounter]]
+  # {group-name -> {perfcounter-symbol -> perfcounter}}
+  groups: Dict[str, Dict[str, AdrenoPerfCounter]]
 
   def __str__(self):
     lines = [f"Series: {self.series}"]
     for group_name, group in self.groups.items():
       lines.append(f"  PerfCounter Group: '{group_name}'")
-      for value, case in group.items():
-        lines.append(f"    {value} -> {case.symbol} ({case.name})")
+      for _, case in group.items():
+        lines.append(f"    {case.selector} -> {case.symbol} ({case.name})")
     return "\n".join(lines)
 
   def get_all_perfcounters_as_one_enum(self):
@@ -77,14 +78,14 @@ class AdrenoPerSeriesDefinition:
       full_group_name = ADRENO_PERFCOUNTER_GROUPS.get(group_name, group_name)
       for case in group.values():
         # Offset the symbol's value by its group
-        value = case.value + ADRENO_MAX_COUNTER_COUNT_PER_GROUP * group_id
+        value = case.selector + ADRENO_MAX_COUNTER_COUNT_PER_GROUP * group_id
         cases.append(f"// {full_group_name}: {case.name}")
         cases.append(
             ADRENO_C_ENUM_CASE_TEMPALTE.format(series=self.series.upper(),
                                                group=group_name,
                                                symbol=case.symbol,
                                                value=value))
-    return ADRENO_C_ENUM_TEMPALTE.format(series=self.series.lower(),
+    return ADRENO_C_ENUM_TEMPALTE.format(series=self.series,
                                          cases="\n  ".join(cases))
 
 
@@ -109,19 +110,20 @@ class AdrenoAllSeriesDefinition:
         continue
 
       common_counters = {}
-      for candidate_counter_value, candidate_counter in candidate_group.items():
+      for candidate_counter_symbol, candidate_counter in candidate_group.items(
+      ):
         is_common_counter = True
         # Scan through all the other series to see whether their groups
         # contains the same counter.
         for series in self.all_series[1:]:
           group = series.groups[candidate_group_name]
-          counter = group.get(candidate_counter_value)
+          counter = group.get(candidate_counter_symbol)
           if (counter is None) or (counter != candidate_counter):
             is_common_counter = False
             break
 
         if is_common_counter:
-          common_counters[candidate_counter_value] = candidate_counter
+          common_counters[candidate_counter_symbol] = candidate_counter
 
       common_groups[candidate_group_name] = common_counters
 
@@ -177,7 +179,7 @@ def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
       continue
 
     for case in enum.findall("nouveau:value", ADRENO_XML_NS):
-      value = int(case.get("value"))
+      selector = int(case.get("value"))
       symbol = case.get("name", "")
       # Drop the leading "PERF_" prefix if exists
       if symbol.startswith("PERF_"):
@@ -189,11 +191,11 @@ def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
       case_name = [(w if (len(w) <= 2 or w in acronyms) else w.lower())
                    for w in re.split(r"_+", symbol)]
       case_name = " ".join(case_name)
-      group_cases[value] = AdrenoPerfCounter(case_name, symbol, value)
+      group_cases[symbol] = AdrenoPerfCounter(case_name, symbol, selector)
 
     groups[group_name] = group_cases
 
-  return AdrenoPerSeriesDefinition(series.upper(), groups)
+  return AdrenoPerSeriesDefinition(series.lower(), groups)
 
 
 def update_header_file(header_file: str, updated_content: str):
@@ -252,22 +254,19 @@ def parse_arguments():
 def main(args):
   a5xx_definition = parse_xml_file(args.a5xx_xml)
   a5xx_enum = a5xx_definition.get_all_perfcounters_as_one_enum()
-  a5xx_c_header = os.path.join(args.output,
-                               a5xx_definition.series.lower() + ".h")
+  a5xx_c_header = os.path.join(args.output, a5xx_definition.series + ".h")
   update_header_file(a5xx_c_header, a5xx_enum)
 
   a6xx_definition = parse_xml_file(args.a6xx_xml)
   a6xx_enum = a6xx_definition.get_all_perfcounters_as_one_enum()
-  a6xx_c_header = os.path.join(args.output,
-                               a6xx_definition.series.lower() + ".h")
+  a6xx_c_header = os.path.join(args.output, a6xx_definition.series + ".h")
   update_header_file(a6xx_c_header, a6xx_enum)
 
   # Generate a header containing counters common to all known series
   common_definition = AdrenoAllSeriesDefinition(
       (a5xx_definition, a6xx_definition)).get_common_perfcounters()
   common_enum = common_definition.get_all_perfcounters_as_one_enum()
-  common_c_header = os.path.join(args.output,
-                                 common_definition.series.lower() + ".h")
+  common_c_header = os.path.join(args.output, common_definition.series + ".h")
   update_header_file(common_c_header, common_enum)
 
 
