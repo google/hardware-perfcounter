@@ -36,6 +36,36 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_CCU_DEPTH_READ_FLAG3_COUNT = 14,
   // Cache and Compression Unit: depth read flag4 count
   HPC_GPU_ADRENO_COMMON_CCU_DEPTH_READ_FLAG4_COUNT = 15,
+  // Cache and Compression Unit: color read flag0 count
+  HPC_GPU_ADRENO_COMMON_CCU_COLOR_READ_FLAG0_COUNT = 19,
+  // Cache and Compression Unit: color read flag1 count
+  HPC_GPU_ADRENO_COMMON_CCU_COLOR_READ_FLAG1_COUNT = 20,
+  // Cache and Compression Unit: color read flag2 count
+  HPC_GPU_ADRENO_COMMON_CCU_COLOR_READ_FLAG2_COUNT = 21,
+  // Cache and Compression Unit: color read flag3 count
+  HPC_GPU_ADRENO_COMMON_CCU_COLOR_READ_FLAG3_COUNT = 22,
+  // Cache and Compression Unit: color read flag4 count
+  HPC_GPU_ADRENO_COMMON_CCU_COLOR_READ_FLAG4_COUNT = 23,
+  // Cache and Compression Unit: 2D RD req
+  HPC_GPU_ADRENO_COMMON_CCU_2D_RD_REQ = 27,
+  // Cache and Compression Unit: 2D WR req
+  HPC_GPU_ADRENO_COMMON_CCU_2D_WR_REQ = 28,
+  // CMP: cmpdecmp vbif latency cycles
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_LATENCY_CYCLES = 257,
+  // CMP: cmpdecmp vbif latency samples
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_LATENCY_SAMPLES = 258,
+  // CMP: cmpdecmp vbif read data CCU
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_READ_DATA_CCU = 259,
+  // CMP: cmpdecmp vbif write data CCU
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_WRITE_DATA_CCU = 260,
+  // CMP: cmpdecmp vbif read request
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_READ_REQUEST = 261,
+  // CMP: cmpdecmp vbif write request
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_WRITE_REQUEST = 262,
+  // CMP: cmpdecmp vbif read data
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_READ_DATA = 263,
+  // CMP: cmpdecmp vbif write data
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_VBIF_WRITE_DATA = 264,
   // CMP: cmpdecmp flag fetch cycles
   HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_FLAG_FETCH_CYCLES = 265,
   // CMP: cmpdecmp flag fetch samples
@@ -48,12 +78,52 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_DEPTH_WRITE_FLAG3_COUNT = 269,
   // CMP: cmpdecmp depth write flag4 count
   HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_DEPTH_WRITE_FLAG4_COUNT = 270,
+  // CMP: cmpdecmp color write flag1 count
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_COLOR_WRITE_FLAG1_COUNT = 274,
+  // CMP: cmpdecmp color write flag2 count
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_COLOR_WRITE_FLAG2_COUNT = 275,
+  // CMP: cmpdecmp color write flag3 count
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_COLOR_WRITE_FLAG3_COUNT = 276,
+  // CMP: cmpdecmp color write flag4 count
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_COLOR_WRITE_FLAG4_COUNT = 277,
+  // CMP: cmpdecmp 2D stall cycles vbif req
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_2D_STALL_CYCLES_VBIF_REQ = 281,
+  // CMP: cmpdecmp 2D stall cycles vbif WR
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_2D_STALL_CYCLES_VBIF_WR = 282,
+  // CMP: cmpdecmp 2D stall cycles vbif return
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_2D_STALL_CYCLES_VBIF_RETURN = 283,
+  // CMP: cmpdecmp 2D RD data
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_2D_RD_DATA = 284,
+  // CMP: cmpdecmp 2D WR data
+  HPC_GPU_ADRENO_COMMON_CMP_CMPDECMP_2D_WR_DATA = 285,
   // Command Parser: always count
   HPC_GPU_ADRENO_COMMON_CP_ALWAYS_COUNT = 512,
   // Command Parser: busy gfx core idle
   HPC_GPU_ADRENO_COMMON_CP_BUSY_GFX_CORE_IDLE = 513,
   // Command Parser: busy cycles
   HPC_GPU_ADRENO_COMMON_CP_BUSY_CYCLES = 514,
+  // Command Parser: num preemptions
+  HPC_GPU_ADRENO_COMMON_CP_NUM_PREEMPTIONS = 515,
+  // Command Parser: preemption reaction delay
+  HPC_GPU_ADRENO_COMMON_CP_PREEMPTION_REACTION_DELAY = 516,
+  // Command Parser: preemption switch out time
+  HPC_GPU_ADRENO_COMMON_CP_PREEMPTION_SWITCH_OUT_TIME = 517,
+  // Command Parser: preemption switch IN time
+  HPC_GPU_ADRENO_COMMON_CP_PREEMPTION_SWITCH_IN_TIME = 518,
+  // Command Parser: dead draws IN bin render
+  HPC_GPU_ADRENO_COMMON_CP_DEAD_DRAWS_IN_BIN_RENDER = 519,
+  // Command Parser: predicated draws killed
+  HPC_GPU_ADRENO_COMMON_CP_PREDICATED_DRAWS_KILLED = 520,
+  // Command Parser: mode switch
+  HPC_GPU_ADRENO_COMMON_CP_MODE_SWITCH = 521,
+  // Command Parser: zpass done
+  HPC_GPU_ADRENO_COMMON_CP_ZPASS_DONE = 522,
+  // Command Parser: context done
+  HPC_GPU_ADRENO_COMMON_CP_CONTEXT_DONE = 523,
+  // Command Parser: cache flush
+  HPC_GPU_ADRENO_COMMON_CP_CACHE_FLUSH = 524,
+  // Command Parser: long preemptions
+  HPC_GPU_ADRENO_COMMON_CP_LONG_PREEMPTIONS = 525,
   // High Level SeQuencer: busy cycles
   HPC_GPU_ADRENO_COMMON_HLSQ_BUSY_CYCLES = 768,
   // High Level SeQuencer: stall cycles UCHE
@@ -68,6 +138,10 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_HLSQ_UCHE_LATENCY_COUNT = 773,
   // High Level SeQuencer: quads
   HPC_GPU_ADRENO_COMMON_HLSQ_QUADS = 776,
+  // High Level SeQuencer: CS invocations
+  HPC_GPU_ADRENO_COMMON_HLSQ_CS_INVOCATIONS = 777,
+  // High Level SeQuencer: compute drawcalls
+  HPC_GPU_ADRENO_COMMON_HLSQ_COMPUTE_DRAWCALLS = 778,
   // Low Resolution Z: busy cycles
   HPC_GPU_ADRENO_COMMON_LRZ_BUSY_CYCLES = 1024,
   // Low Resolution Z: starve cycles RAS
@@ -202,6 +276,62 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_RAS_PRIM_KILLED_INVISILBE = 1545,
   // RB: busy cycles
   HPC_GPU_ADRENO_COMMON_RB_BUSY_CYCLES = 1792,
+  // RB: stall cycles HLSQ
+  HPC_GPU_ADRENO_COMMON_RB_STALL_CYCLES_HLSQ = 1793,
+  // RB: stall cycles fifo0 full
+  HPC_GPU_ADRENO_COMMON_RB_STALL_CYCLES_FIFO0_FULL = 1794,
+  // RB: stall cycles fifo1 full
+  HPC_GPU_ADRENO_COMMON_RB_STALL_CYCLES_FIFO1_FULL = 1795,
+  // RB: stall cycles fifo2 full
+  HPC_GPU_ADRENO_COMMON_RB_STALL_CYCLES_FIFO2_FULL = 1796,
+  // RB: starve cycles SP
+  HPC_GPU_ADRENO_COMMON_RB_STARVE_CYCLES_SP = 1797,
+  // RB: starve cycles LRZ tile
+  HPC_GPU_ADRENO_COMMON_RB_STARVE_CYCLES_LRZ_TILE = 1798,
+  // RB: starve cycles CCU
+  HPC_GPU_ADRENO_COMMON_RB_STARVE_CYCLES_CCU = 1799,
+  // RB: starve cycles Z plane
+  HPC_GPU_ADRENO_COMMON_RB_STARVE_CYCLES_Z_PLANE = 1800,
+  // RB: starve cycles bary plane
+  HPC_GPU_ADRENO_COMMON_RB_STARVE_CYCLES_BARY_PLANE = 1801,
+  // RB: Z workload
+  HPC_GPU_ADRENO_COMMON_RB_Z_WORKLOAD = 1802,
+  // RB: HLSQ active
+  HPC_GPU_ADRENO_COMMON_RB_HLSQ_ACTIVE = 1803,
+  // RB: Z read
+  HPC_GPU_ADRENO_COMMON_RB_Z_READ = 1804,
+  // RB: Z write
+  HPC_GPU_ADRENO_COMMON_RB_Z_WRITE = 1805,
+  // RB: C read
+  HPC_GPU_ADRENO_COMMON_RB_C_READ = 1806,
+  // RB: C write
+  HPC_GPU_ADRENO_COMMON_RB_C_WRITE = 1807,
+  // RB: total pass
+  HPC_GPU_ADRENO_COMMON_RB_TOTAL_PASS = 1808,
+  // RB: Z pass
+  HPC_GPU_ADRENO_COMMON_RB_Z_PASS = 1809,
+  // RB: Z fail
+  HPC_GPU_ADRENO_COMMON_RB_Z_FAIL = 1810,
+  // RB: S fail
+  HPC_GPU_ADRENO_COMMON_RB_S_FAIL = 1811,
+  // RB: blended fxp components
+  HPC_GPU_ADRENO_COMMON_RB_BLENDED_FXP_COMPONENTS = 1812,
+  // RB: blended fp16 components
+  HPC_GPU_ADRENO_COMMON_RB_BLENDED_FP16_COMPONENTS = 1813,
+  // RB: 2D alive cycles
+  HPC_GPU_ADRENO_COMMON_RB_2D_ALIVE_CYCLES = 1815,
+  // RB: 2D stall cycles a2d
+  HPC_GPU_ADRENO_COMMON_RB_2D_STALL_CYCLES_A2D = 1816,
+  // RB: 2D starve cycles src
+  HPC_GPU_ADRENO_COMMON_RB_2D_STARVE_CYCLES_SRC = 1817,
+  // RB: 2D starve cycles SP
+  HPC_GPU_ADRENO_COMMON_RB_2D_STARVE_CYCLES_SP = 1818,
+  // RB: 2D starve cycles dst
+  HPC_GPU_ADRENO_COMMON_RB_2D_STARVE_CYCLES_DST = 1819,
+  // RB: 2D valid pixels
+  HPC_GPU_ADRENO_COMMON_RB_2D_VALID_PIXELS = 1820,
+  // RB: stall cycles CCU
+  HPC_GPU_ADRENO_COMMON_RB_STALL_CYCLES_CCU = 1836,
   // RBBM: always count
   HPC_GPU_ADRENO_COMMON_RBBM_ALWAYS_COUNT = 2048,
   // RBBM: always ON
@@ -220,6 +350,8 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_RBBM_COM_BUSY = 2055,
   // RBBM: dcom busy
   HPC_GPU_ADRENO_COMMON_RBBM_DCOM_BUSY = 2056,
+  // RBBM: vbif busy
+  HPC_GPU_ADRENO_COMMON_RBBM_VBIF_BUSY = 2057,
   // RBBM: VSC busy
   HPC_GPU_ADRENO_COMMON_RBBM_VSC_BUSY = 2058,
   // RBBM: tess busy
@@ -294,6 +426,58 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_SP_GM_ATOMICS = 2336,
   // Shader/Streaming Processor: VS stage tex instructions
   HPC_GPU_ADRENO_COMMON_SP_VS_STAGE_TEX_INSTRUCTIONS = 2337,
+  // Shader/Streaming Processor: VS stage EFU instructions
+  HPC_GPU_ADRENO_COMMON_SP_VS_STAGE_EFU_INSTRUCTIONS = 2338,
+  // Shader/Streaming Processor: VS stage full ALU instructions
+  HPC_GPU_ADRENO_COMMON_SP_VS_STAGE_FULL_ALU_INSTRUCTIONS = 2339,
+  // Shader/Streaming Processor: VS stage half ALU instructions
+  HPC_GPU_ADRENO_COMMON_SP_VS_STAGE_HALF_ALU_INSTRUCTIONS = 2340,
+  // Shader/Streaming Processor: FS stage tex instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_STAGE_TEX_INSTRUCTIONS = 2341,
+  // Shader/Streaming Processor: FS stage cflow instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_STAGE_CFLOW_INSTRUCTIONS = 2342,
+  // Shader/Streaming Processor: FS stage EFU instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_STAGE_EFU_INSTRUCTIONS = 2343,
+  // Shader/Streaming Processor: FS stage full ALU instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_STAGE_FULL_ALU_INSTRUCTIONS = 2344,
+  // Shader/Streaming Processor: FS stage half ALU instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_STAGE_HALF_ALU_INSTRUCTIONS = 2345,
+  // Shader/Streaming Processor: FS stage bary instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_STAGE_BARY_INSTRUCTIONS = 2346,
+  // Shader/Streaming Processor: VS instructions
+  HPC_GPU_ADRENO_COMMON_SP_VS_INSTRUCTIONS = 2347,
+  // Shader/Streaming Processor: FS instructions
+  HPC_GPU_ADRENO_COMMON_SP_FS_INSTRUCTIONS = 2348,
+  // Shader/Streaming Processor: addr lock count
+  HPC_GPU_ADRENO_COMMON_SP_ADDR_LOCK_COUNT = 2349,
+  // Shader/Streaming Processor: UCHE read trans
+  HPC_GPU_ADRENO_COMMON_SP_UCHE_READ_TRANS = 2350,
+  // Shader/Streaming Processor: UCHE write trans
+  HPC_GPU_ADRENO_COMMON_SP_UCHE_WRITE_TRANS = 2351,
+  // Shader/Streaming Processor: export VPC trans
+  HPC_GPU_ADRENO_COMMON_SP_EXPORT_VPC_TRANS = 2352,
+  // Shader/Streaming Processor: export RB trans
+  HPC_GPU_ADRENO_COMMON_SP_EXPORT_RB_TRANS = 2353,
+  // Shader/Streaming Processor: pixels killed
+  HPC_GPU_ADRENO_COMMON_SP_PIXELS_KILLED = 2354,
+  // Shader/Streaming Processor: icl1 requests
+  HPC_GPU_ADRENO_COMMON_SP_ICL1_REQUESTS = 2355,
+  // Shader/Streaming Processor: icl1 misses
+  HPC_GPU_ADRENO_COMMON_SP_ICL1_MISSES = 2356,
+  // Shader/Streaming Processor: HS instructions
+  HPC_GPU_ADRENO_COMMON_SP_HS_INSTRUCTIONS = 2357,
+  // Shader/Streaming Processor: DS instructions
+  HPC_GPU_ADRENO_COMMON_SP_DS_INSTRUCTIONS = 2358,
+  // Shader/Streaming Processor: GS instructions
+  HPC_GPU_ADRENO_COMMON_SP_GS_INSTRUCTIONS = 2359,
+  // Shader/Streaming Processor: CS instructions
+  HPC_GPU_ADRENO_COMMON_SP_CS_INSTRUCTIONS = 2360,
+  // Shader/Streaming Processor: GPR read
+  HPC_GPU_ADRENO_COMMON_SP_GPR_READ = 2361,
+  // Shader/Streaming Processor: GPR write
+  HPC_GPU_ADRENO_COMMON_SP_GPR_WRITE = 2362,
+  // Shader/Streaming Processor: LM bank conflicts
+  HPC_GPU_ADRENO_COMMON_SP_LM_BANK_CONFLICTS = 2365,
   // Texture Processor: busy cycles
   HPC_GPU_ADRENO_COMMON_TP_BUSY_CYCLES = 2560,
   // Texture Processor: stall cycles UCHE
@@ -340,6 +524,36 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_TP_QUADS_3D = 2581,
   // Texture Processor: quads cube
   HPC_GPU_ADRENO_COMMON_TP_QUADS_CUBE = 2582,
+  // Texture Processor: divergent quads received
+  HPC_GPU_ADRENO_COMMON_TP_DIVERGENT_QUADS_RECEIVED = 2583,
+  // Texture Processor: prt non resident events
+  HPC_GPU_ADRENO_COMMON_TP_PRT_NON_RESIDENT_EVENTS = 2584,
+  // Texture Processor: output pixels point
+  HPC_GPU_ADRENO_COMMON_TP_OUTPUT_PIXELS_POINT = 2585,
+  // Texture Processor: output pixels bilinear
+  HPC_GPU_ADRENO_COMMON_TP_OUTPUT_PIXELS_BILINEAR = 2586,
+  // Texture Processor: output pixels mip
+  HPC_GPU_ADRENO_COMMON_TP_OUTPUT_PIXELS_MIP = 2587,
+  // Texture Processor: output pixels aniso
+  HPC_GPU_ADRENO_COMMON_TP_OUTPUT_PIXELS_ANISO = 2588,
+  // Texture Processor: output pixels zero lod
+  HPC_GPU_ADRENO_COMMON_TP_OUTPUT_PIXELS_ZERO_LOD = 2589,
+  // Texture Processor: flag cache requests
+  HPC_GPU_ADRENO_COMMON_TP_FLAG_CACHE_REQUESTS = 2590,
+  // Texture Processor: flag cache misses
+  HPC_GPU_ADRENO_COMMON_TP_FLAG_CACHE_MISSES = 2591,
+  // Texture Processor: L1 5 L2 requests
+  HPC_GPU_ADRENO_COMMON_TP_L1_5_L2_REQUESTS = 2592,
+  // Texture Processor: 2D output pixels
+  HPC_GPU_ADRENO_COMMON_TP_2D_OUTPUT_PIXELS = 2593,
+  // Texture Processor: 2D output pixels point
+  HPC_GPU_ADRENO_COMMON_TP_2D_OUTPUT_PIXELS_POINT = 2594,
+  // Texture Processor: 2D output pixels bilinear
+  HPC_GPU_ADRENO_COMMON_TP_2D_OUTPUT_PIXELS_BILINEAR = 2595,
+  // Texture Processor: 2D filter workload 16bit
+  HPC_GPU_ADRENO_COMMON_TP_2D_FILTER_WORKLOAD_16BIT = 2596,
+  // Texture Processor: 2D filter workload 32bit
+  HPC_GPU_ADRENO_COMMON_TP_2D_FILTER_WORKLOAD_32BIT = 2597,
   // Triangle Setup Engine: busy cycles
   HPC_GPU_ADRENO_COMMON_TSE_BUSY_CYCLES = 2816,
   // Triangle Setup Engine: clipping cycles
@@ -378,6 +592,20 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_TSE_2D_INPUT_PRIM = 2833,
   // Unified L2 Cache: busy cycles
   HPC_GPU_ADRENO_COMMON_UCHE_BUSY_CYCLES = 3072,
+  // Unified L2 Cache: vbif latency cycles
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_LATENCY_CYCLES = 3074,
+  // Unified L2 Cache: vbif latency samples
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_LATENCY_SAMPLES = 3075,
+  // Unified L2 Cache: vbif read beats TP
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_TP = 3076,
+  // Unified L2 Cache: vbif read beats VFD
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_VFD = 3077,
+  // Unified L2 Cache: vbif read beats HLSQ
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_HLSQ = 3078,
+  // Unified L2 Cache: vbif read beats LRZ
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_LRZ = 3079,
+  // Unified L2 Cache: vbif read beats SP
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_SP = 3080,
   // Unified L2 Cache: read requests TP
   HPC_GPU_ADRENO_COMMON_UCHE_READ_REQUESTS_TP = 3081,
   // Unified L2 Cache: read requests VFD
@@ -414,6 +642,10 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_UCHE_BANK_REQ6 = 3097,
   // Unified L2 Cache: bank req7
   HPC_GPU_ADRENO_COMMON_UCHE_BANK_REQ7 = 3098,
+  // Unified L2 Cache: vbif read beats ch0
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_CH0 = 3099,
+  // Unified L2 Cache: vbif read beats ch1
+  HPC_GPU_ADRENO_COMMON_UCHE_VBIF_READ_BEATS_CH1 = 3100,
   // Unified L2 Cache: gmem read beats
   HPC_GPU_ADRENO_COMMON_UCHE_GMEM_READ_BEATS = 3101,
   // VFD: busy cycles
@@ -422,6 +654,44 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_VFD_STALL_CYCLES_UCHE = 3329,
   // VFD: stall cycles VPC alloc
   HPC_GPU_ADRENO_COMMON_VFD_STALL_CYCLES_VPC_ALLOC = 3330,
+  // VFD: stall cycles SP info
+  HPC_GPU_ADRENO_COMMON_VFD_STALL_CYCLES_SP_INFO = 3331,
+  // VFD: stall cycles SP attr
+  HPC_GPU_ADRENO_COMMON_VFD_STALL_CYCLES_SP_ATTR = 3332,
+  // VFD: starve cycles UCHE
+  HPC_GPU_ADRENO_COMMON_VFD_STARVE_CYCLES_UCHE = 3333,
+  // VFD: rbuffer full
+  HPC_GPU_ADRENO_COMMON_VFD_RBUFFER_FULL = 3334,
+  // VFD: attr info fifo full
+  HPC_GPU_ADRENO_COMMON_VFD_ATTR_INFO_FIFO_FULL = 3335,
+  // VFD: decoded attribute bytes
+  HPC_GPU_ADRENO_COMMON_VFD_DECODED_ATTRIBUTE_BYTES = 3336,
+  // VFD: num attributes
+  HPC_GPU_ADRENO_COMMON_VFD_NUM_ATTRIBUTES = 3337,
+  // VFD: upper shader fibers
+  HPC_GPU_ADRENO_COMMON_VFD_UPPER_SHADER_FIBERS = 3338,
+  // VFD: lower shader fibers
+  HPC_GPU_ADRENO_COMMON_VFD_LOWER_SHADER_FIBERS = 3339,
+  // VFD: mode 0 fibers
+  HPC_GPU_ADRENO_COMMON_VFD_MODE_0_FIBERS = 3340,
+  // VFD: mode 1 fibers
+  HPC_GPU_ADRENO_COMMON_VFD_MODE_1_FIBERS = 3341,
+  // VFD: mode 2 fibers
+  HPC_GPU_ADRENO_COMMON_VFD_MODE_2_FIBERS = 3342,
+  // VFD: mode 3 fibers
+  HPC_GPU_ADRENO_COMMON_VFD_MODE_3_FIBERS = 3343,
+  // VFD: mode 4 fibers
+  HPC_GPU_ADRENO_COMMON_VFD_MODE_4_FIBERS = 3344,
+  // VFD: total vertices
+  HPC_GPU_ADRENO_COMMON_VFD_TOTAL_VERTICES = 3345,
+  // VFD: vfdp stall cycles VFD
+  HPC_GPU_ADRENO_COMMON_VFD_VFDP_STALL_CYCLES_VFD = 3346,
+  // VFD: vfdp stall cycles VFD index
+  HPC_GPU_ADRENO_COMMON_VFD_VFDP_STALL_CYCLES_VFD_INDEX = 3347,
+  // VFD: vfdp stall cycles VFD prog
+  HPC_GPU_ADRENO_COMMON_VFD_VFDP_STALL_CYCLES_VFD_PROG = 3348,
+  // VFD: vfdp starve cycles PC
+  HPC_GPU_ADRENO_COMMON_VFD_VFDP_STARVE_CYCLES_PC = 3349,
   // VPC: busy cycles
   HPC_GPU_ADRENO_COMMON_VPC_BUSY_CYCLES = 3584,
   // VPC: working cycles
@@ -436,6 +706,14 @@ typedef enum hpc_gpu_adreno_common_perfcounter_e {
   HPC_GPU_ADRENO_COMMON_VPC_STALL_CYCLES_PC = 3589,
   // VPC: stall cycles SP LM
   HPC_GPU_ADRENO_COMMON_VPC_STALL_CYCLES_SP_LM = 3590,
+  // VPC: starve cycles SP
+  HPC_GPU_ADRENO_COMMON_VPC_STARVE_CYCLES_SP = 3591,
+  // VPC: starve cycles LRZ
+  HPC_GPU_ADRENO_COMMON_VPC_STARVE_CYCLES_LRZ = 3592,
+  // VPC: PC primitives
+  HPC_GPU_ADRENO_COMMON_VPC_PC_PRIMITIVES = 3593,
+  // VPC: SP components
+  HPC_GPU_ADRENO_COMMON_VPC_SP_COMPONENTS = 3594,
   // VSC: busy cycles
   HPC_GPU_ADRENO_COMMON_VSC_BUSY_CYCLES = 3840,
   // VSC: working cycles

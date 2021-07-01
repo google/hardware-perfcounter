@@ -38,7 +38,18 @@ typedef enum hpc_gpu_adreno_{series}_perfcounter_e {{
 
 """
 
-ADRENO_C_ENUM_CASE_TEMPALTE = "HPC_GPU_ADRENO_{series}_{group}_{symbol} = {value},"
+ADRENO_C_ENUM_CASE_TEMPALTE = "HPC_GPU_ADRENO_{series}_{group}_{symbol}"
+ADRENO_C_ENUM_CASE_VALUE_TEMPALTE = "HPC_GPU_ADRENO_{series}_{group}_{symbol} = {value},"
+ADRENO_ENUM_VALUE_TO_SELECTOR_FN = """
+unsigned int hpc_gpu_adreno_common_to_{series}_perfcounter_convert(
+    hpc_gpu_adreno_common_perfcounter_t perfcounter) {{
+  // clang-format off
+  switch (perfcounter) {{
+    {cases}
+  }}
+  // clang-format on
+}}
+"""
 
 
 @dataclass
@@ -81,19 +92,19 @@ class AdrenoPerSeriesDefinition:
         value = case.selector + ADRENO_MAX_COUNTER_COUNT_PER_GROUP * group_id
         cases.append(f"// {full_group_name}: {case.name}")
         cases.append(
-            ADRENO_C_ENUM_CASE_TEMPALTE.format(series=self.series.upper(),
-                                               group=group_name,
-                                               symbol=case.symbol,
-                                               value=value))
+            ADRENO_C_ENUM_CASE_VALUE_TEMPALTE.format(series=self.series.upper(),
+                                                     group=group_name,
+                                                     symbol=case.symbol,
+                                                     value=value))
     return ADRENO_C_ENUM_TEMPALTE.format(series=self.series,
                                          cases="\n  ".join(cases))
 
 
 @dataclass
 class AdrenoAllSeriesDefinition:
-  all_series: Tuple[AdrenoPerSeriesDefinition]
+  all_series: Tuple[AdrenoPerSeriesDefinition, AdrenoPerSeriesDefinition]
 
-  def get_common_perfcounters(self):
+  def get_common_series(self):
     """Gets a "common" series containing perfcounters available to all series."""
     if len(self.all_series) == 0:
       return AdrenoPerSeriesDefinition("common", {})
@@ -118,16 +129,36 @@ class AdrenoAllSeriesDefinition:
         for series in self.all_series[1:]:
           group = series.groups[candidate_group_name]
           counter = group.get(candidate_counter_symbol)
-          if (counter is None) or (counter != candidate_counter):
+          if counter is None:
             is_common_counter = False
             break
-
         if is_common_counter:
           common_counters[candidate_counter_symbol] = candidate_counter
 
       common_groups[candidate_group_name] = common_counters
 
     return AdrenoPerSeriesDefinition("common", common_groups)
+
+  def get_perfcounter_enum_value_to_selector_conversion(self) -> str:
+    """Returns a C function converting perfcounter enum values to selector IDs."""
+    functions = []
+    common_series = self.get_common_series()
+    for to_series in self.all_series:
+      value_to_selector = []
+      for common_group_name, common_group in common_series.groups.items():
+        to_group = to_series.groups[common_group_name]
+        for common_counter_symbol, _ in common_group.items():
+          full_symbol = ADRENO_C_ENUM_CASE_TEMPALTE.format(
+              series=common_series.series.upper(),
+              group=common_group_name,
+              symbol=common_counter_symbol)
+          to_selector = to_group[common_counter_symbol].selector
+          value_to_selector.append("case {}: return {};".format(
+              full_symbol, to_selector))
+      functions.append(
+          ADRENO_ENUM_VALUE_TO_SELECTOR_FN.format(
+              series=to_series.series, cases="\n    ".join(value_to_selector)))
+    return "".join(functions) + "\n"
 
 
 def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
@@ -198,9 +229,9 @@ def parse_xml_file(xml_path: str) -> AdrenoPerSeriesDefinition:
   return AdrenoPerSeriesDefinition(series.lower(), groups)
 
 
-def update_header_file(header_file: str, updated_content: str):
-  """Updates the autogen region in the given header file to the new content."""
-  with open(header_file, "r") as f:
+def update_generated_file(autogen_file: str, updated_content: str):
+  """Updates the autogen region in the given file to the new content."""
+  with open(autogen_file, "r") as f:
     old_content = f.readlines()
 
   marker_lines = []
@@ -215,7 +246,7 @@ def update_header_file(header_file: str, updated_content: str):
   new_content.append(updated_content)
   new_content.extend(old_content[marker_lines[1]:])
 
-  with open(header_file, "w") as f:
+  with open(autogen_file, "w") as f:
     f.write(''.join(new_content))
 
 
@@ -241,11 +272,15 @@ def parse_arguments():
       type=check_file_path,
       required=True,
       help="Specify the XML file path containing Adreno A6xx definitions")
-  parser.add_argument("-o",
-                      "--output",
+  parser.add_argument("--header_dir",
                       metavar="<c-header-directory>",
                       required=True,
                       help="Specify the directory for generated C header files")
+  parser.add_argument(
+      "--lib_dir",
+      metavar="<c-library-directory>",
+      required=True,
+      help="Specify the directory for generated C library files")
   args = parser.parse_args()
 
   return args
@@ -254,20 +289,26 @@ def parse_arguments():
 def main(args):
   a5xx_definition = parse_xml_file(args.a5xx_xml)
   a5xx_enum = a5xx_definition.get_all_perfcounters_as_one_enum()
-  a5xx_c_header = os.path.join(args.output, a5xx_definition.series + ".h")
-  update_header_file(a5xx_c_header, a5xx_enum)
+  a5xx_c_header = os.path.join(args.header_dir, a5xx_definition.series + ".h")
+  update_generated_file(a5xx_c_header, a5xx_enum)
 
   a6xx_definition = parse_xml_file(args.a6xx_xml)
   a6xx_enum = a6xx_definition.get_all_perfcounters_as_one_enum()
-  a6xx_c_header = os.path.join(args.output, a6xx_definition.series + ".h")
-  update_header_file(a6xx_c_header, a6xx_enum)
+  a6xx_c_header = os.path.join(args.header_dir, a6xx_definition.series + ".h")
+  update_generated_file(a6xx_c_header, a6xx_enum)
 
-  # Generate a header containing counters common to all known series
-  common_definition = AdrenoAllSeriesDefinition(
-      (a5xx_definition, a6xx_definition)).get_common_perfcounters()
+  # Generate files containing counters common to all known series
+  all_series = AdrenoAllSeriesDefinition((a6xx_definition, a5xx_definition))
+
+  common_definition = all_series.get_common_series()
   common_enum = common_definition.get_all_perfcounters_as_one_enum()
-  common_c_header = os.path.join(args.output, common_definition.series + ".h")
-  update_header_file(common_c_header, common_enum)
+  common_c_header = os.path.join(args.header_dir,
+                                 common_definition.series + ".h")
+  update_generated_file(common_c_header, common_enum)
+
+  functions = all_series.get_perfcounter_enum_value_to_selector_conversion()
+  common_c_lib = os.path.join(args.lib_dir, common_definition.series + ".c")
+  update_generated_file(common_c_lib, functions)
 
 
 if __name__ == "__main__":

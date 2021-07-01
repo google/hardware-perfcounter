@@ -12,8 +12,10 @@ if(Python3_Interpreter_FOUND)
           "${HPC_SOURCE_ROOT}/third_party/envytools/registers/adreno/a5xx.xml"
         --a6xx_xml
           "${HPC_SOURCE_ROOT}/third_party/envytools/registers/adreno/a6xx.xml"
-        --output
+        --header_dir
           "${HPC_SOURCE_ROOT}/include/hpc/gpu/adreno/"
+        --lib_dir
+          "${HPC_SOURCE_ROOT}/lib/gpu/adreno/"
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/generate_adreno_definitions.py"
       "${HPC_SOURCE_ROOT}/third_party/envytools/registers/adreno/a5xx.xml"
