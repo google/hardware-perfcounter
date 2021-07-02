@@ -1,5 +1,6 @@
 #include "hpc/gpu/adreno/context.h"
 
+#include <stdint.h>
 #include <string.h>  // For memset
 #include <unistd.h>  // For close
 
@@ -122,8 +123,10 @@ int adreno_context_query_perfcounters(hpc_gpu_adreno_context_t *context,
       context->gpu_device, context->num_counters, context->counters, values);
   for (int i = 0; i < context->num_counters; ++i) {
     uint64_t value = values[i];
+    uint64_t prev_value = context->prev_values[i];
     // Counters increase linearly. We need to subtract the previous value.
-    values[i] -= context->prev_values[i];
+    if (value < prev_value) return -HPC_GPU_ERROR_INTERNAL;
+    values[i] -= prev_value;
     context->prev_values[i] = value;
   }
 

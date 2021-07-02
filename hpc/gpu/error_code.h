@@ -12,6 +12,8 @@ typedef enum hpc_gpu_error_e {
   HPC_GPU_ERROR_UNKNOWN_DEVICE = HPC_GPU_FIRST_ERROR_CODE,
   /// The current GPU device is incompatible.
   HPC_GPU_ERROR_INCOMPATIBLE_DEVICE,
+  /// Internal error.
+  HPC_GPU_ERROR_INTERNAL,
 } hpc_gpu_error_t;
 
 #endif  // HPC_GPU_ERROR_CODE_H_
