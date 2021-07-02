@@ -5,7 +5,6 @@
 #include <unistd.h>
 
 #include "hpc/gpu/adreno/context.h"
-#include "hpc/gpu/adreno/driver_ioctl.h"
 #include "hpc/gpu/allocation_callback.h"
 #include "hpc/gpu/error_code.h"
 

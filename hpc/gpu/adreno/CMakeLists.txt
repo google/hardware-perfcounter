@@ -5,6 +5,8 @@ hpc_cc_library(
     a5xx.h
   SRCS
     a5xx.c
+  LINKOPTS
+    ::context
 )
 
 hpc_cc_library(
@@ -14,6 +16,8 @@ hpc_cc_library(
     a6xx.h
   SRCS
     a6xx.c
+  LINKOPTS
+    ::context
 )
 
 hpc_cc_library(
