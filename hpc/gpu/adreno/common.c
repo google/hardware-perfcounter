@@ -38,7 +38,7 @@ struct hpc_gpu_adreno_common_context_t {
 
 int hpc_gpu_adreno_common_create_context(
     uint32_t num_counters, hpc_gpu_adreno_common_perfcounter_t *counters,
-    const hpc_gpu_allocation_callbacks_t *allocator,
+    const hpc_gpu_host_allocation_callbacks_t *allocator,
     hpc_gpu_adreno_common_context_t **out_context) {
   hpc_gpu_adreno_common_context_t *context = allocator->alloc(
       allocator->user_data, sizeof(hpc_gpu_adreno_common_context_t));
@@ -96,7 +96,7 @@ int hpc_gpu_adreno_common_create_context(
 
 int hpc_gpu_adreno_common_destroy_context(
     hpc_gpu_adreno_common_context_t *context,
-    const hpc_gpu_allocation_callbacks_t *allocator) {
+    const hpc_gpu_host_allocation_callbacks_t *allocator) {
   int status = close(context->gpu_device);
   if (status < 0) return status;
 

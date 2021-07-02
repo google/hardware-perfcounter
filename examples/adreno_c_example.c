@@ -35,7 +35,8 @@ int main(void) {
   uint32_t num_counters = sizeof(perfcounters) / sizeof(perfcounters[0]);
 
   hpc_gpu_adreno_common_context_t *context = NULL;
-  hpc_gpu_allocation_callbacks_t allocator = {NULL, &allocate, &deallocate};
+  hpc_gpu_host_allocation_callbacks_t allocator = {NULL, &allocate,
+                                                   &deallocate};
   status = hpc_gpu_adreno_common_create_context(num_counters, perfcounters,
                                                 &allocator, &context);
   if (status < 0) {
