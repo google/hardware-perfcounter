@@ -3,4 +3,7 @@ hpc_cc_binary(
     adreno_c_example
   SRCS
     adreno_c_example.c
+  DEPS
+    hpc::gpu::adreno::common
+    hpc::gpu::adreno::driver_ioctl
 )

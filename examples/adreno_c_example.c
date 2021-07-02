@@ -1,148 +1,83 @@
-#include <fcntl.h>
+#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <string.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
+#include <stdlib.h>
+#include <time.h>
 
-#define ADRENO_IOC_TYPE 0x09
+#include "hpc/gpu/adreno/common.h"
+#include "hpc/gpu/adreno/driver_ioctl.h"
+#include "hpc/gpu/allocation_callback.h"
+#include "hpc/gpu/error_code.h"
 
-#define ADRENO_PERFCOUNTER_GROUP_SP 0xA
-
-#define ADRENO_SP_BUSY_CYCLES 0
-#define ADRENO_SP_GM_ATOMICS 32
-#define ADRENO_SP_FS_INSTRUCTIONS 44
-
-struct adreno_perfcounter_get {
-  unsigned int group_id;
-  unsigned int countable_selector;
-  unsigned int regster_offset_low;
-  unsigned int regster_offset_high;
-  unsigned int __pad;
-};
-
-#define ADRENO_IOCTL_PERFCOUNTER_GET \
-  _IOWR(ADRENO_IOC_TYPE, 0x38, struct adreno_perfcounter_get)
-
-void andreno_activate_perf_counter(int gpu_device, unsigned int group_id,
-                                   unsigned int countable_selector) {
-  struct adreno_perfcounter_get payload;
-  memset(&payload, 0, sizeof(struct adreno_perfcounter_get));
-  payload.group_id = group_id;
-  payload.countable_selector = countable_selector;
-
-  int ret = ioctl(gpu_device, ADRENO_IOCTL_PERFCOUNTER_GET, &payload);
-  if (ret == -1) {
-    perror("ioctl");
-  }
-}
-
-struct adreno_perfcounter_put {
-  unsigned int group_id;
-  unsigned int countable_selector;
-  unsigned int __pad[2];
-};
-
-#define ADRENO_IOCTL_PERFCOUNTER_PUT \
-  _IOW(ADRENO_IOC_TYPE, 0x39, struct adreno_perfcounter_put)
-
-void andreno_deactivate_perf_counter(int gpu_device, unsigned int group_id,
-                                     unsigned int countable_selector) {
-  struct adreno_perfcounter_put payload;
-  memset(&payload, 0, sizeof(struct adreno_perfcounter_put));
-  payload.group_id = group_id;
-  payload.countable_selector = countable_selector;
-
-  int ret = ioctl(gpu_device, ADRENO_IOCTL_PERFCOUNTER_PUT, &payload);
-  if (ret == -1) {
-    perror("ioctl");
-  }
-}
-
-struct adreno_perfcounter_read_group {
-  unsigned int group_id;
-  unsigned int countable_selector;
-  unsigned long long value;
-};
-
-struct adreno_perfcounter_read {
-  struct adreno_perfcounter_read_group *groups;
-  unsigned int num_groups;
-  unsigned int __pad[2];
-};
-
-#define ADRENO_IOCTL_PERFCOUNTER_READ \
-  _IOWR(ADRENO_IOC_TYPE, 0x3B, struct adreno_perfcounter_read)
-
-void andreno_query_perf_counters(int gpu_device, unsigned int num_groups,
-                                 struct adreno_perfcounter_read_group *groups,
-                                 unsigned long long *values) {
-  struct adreno_perfcounter_read payload;
-  memset(&payload, 0, sizeof(struct adreno_perfcounter_read));
-  payload.num_groups = num_groups;
-  payload.groups = groups;
-
-  int ret = ioctl(gpu_device, ADRENO_IOCTL_PERFCOUNTER_READ, &payload);
-  if (ret == -1) {
-    perror("ioctl");
-  }
-
-  for (int i = 0; i < num_groups; ++i) {
-    values[i] = groups[i].value;
-  }
-}
-
-static uint64_t pack2xi32(uint32_t high, uint32_t low) {
-  return ((uint64_t)high << 32) | (uint64_t)low;
-}
+static void *allocate(void *user_data, size_t size) { return malloc(size); }
+static void deallocate(void *user_data, void *memory) { return free(memory); }
 
 int main(void) {
-  int gpu_device = open("/dev/kgsl-3d0", O_RDWR);
-  if (gpu_device == -1) {
-    perror("open");
+  int gpu_device = adreno_open_gpu_device();
+  if (gpu_device < 0) perror("open GPU device");
+
+  int gpu_id = adreno_get_gpu_device_id(gpu_device);
+  if (gpu_id < 0) perror("query GPU ID");
+  printf("[GPU] Adreno %d\n", gpu_id);
+
+  int status = adreno_close_gpu_device(gpu_device);
+  if (status < 0) perror("close GPU device");
+
+  hpc_gpu_adreno_common_perfcounter_t perfcounters[] = {
+      HPC_GPU_ADRENO_COMMON_SP_BUSY_CYCLES,
+      HPC_GPU_ADRENO_COMMON_SP_VS_INSTRUCTIONS,
+      HPC_GPU_ADRENO_COMMON_SP_FS_INSTRUCTIONS,
+      HPC_GPU_ADRENO_COMMON_SP_CS_INSTRUCTIONS,
+      HPC_GPU_ADRENO_COMMON_SP_GM_LOAD_INSTRUCTIONS,
+      HPC_GPU_ADRENO_COMMON_SP_GM_STORE_INSTRUCTIONS,
+  };
+
+  uint32_t num_counters = sizeof(perfcounters) / sizeof(perfcounters[0]);
+
+  hpc_gpu_adreno_common_context_t *context = NULL;
+  hpc_gpu_allocation_callbacks_t allocator = {NULL, &allocate, &deallocate};
+  status = hpc_gpu_adreno_common_create_context(num_counters, perfcounters,
+                                                &allocator, &context);
+  if (status < 0) {
+    if (-status >= HPC_GPU_FIRST_ERROR_CODE) {
+      printf("create context error: %d\n", status);
+    } else {
+      perror("create context");
+    }
+    return status;
   }
 
-  andreno_activate_perf_counter(gpu_device, ADRENO_PERFCOUNTER_GROUP_SP,
-                                ADRENO_SP_BUSY_CYCLES);
-  andreno_activate_perf_counter(gpu_device, ADRENO_PERFCOUNTER_GROUP_SP,
-                                ADRENO_SP_GM_ATOMICS);
-  andreno_activate_perf_counter(gpu_device, ADRENO_PERFCOUNTER_GROUP_SP,
-                                ADRENO_SP_FS_INSTRUCTIONS);
+  status = hpc_gpu_adreno_common_start_perfcounters(context);
+  if (status < 0) {
+    perror("start perfcounters");
+    return status;
+  }
 
-  struct adreno_perfcounter_read_group counters[3];
-  memset(&counters, 0, sizeof(counters));
-  counters[0].group_id = ADRENO_PERFCOUNTER_GROUP_SP;
-  counters[0].countable_selector = ADRENO_SP_BUSY_CYCLES;
-  counters[1].group_id = ADRENO_PERFCOUNTER_GROUP_SP;
-  counters[1].countable_selector = ADRENO_SP_GM_ATOMICS;
-  counters[2].group_id = ADRENO_PERFCOUNTER_GROUP_SP;
-  counters[2].countable_selector = ADRENO_SP_FS_INSTRUCTIONS;
+  uint64_t values[num_counters];
 
-  unsigned long long old_metrics[3], new_metrics[3], diff[3];
-  memset(&old_metrics, 0, sizeof(old_metrics));
+  struct timespec sleep_time, remaining_time;
+  sleep_time.tv_sec = 0;
+  sleep_time.tv_nsec = 100000000;  // 100ms
+
   for (int i = 0; i < 100; ++i) {
-    andreno_query_perf_counters(gpu_device, 3, counters, new_metrics);
-    for (int j = 0; j < 3; ++j) {
-      diff[j] = new_metrics[j] - old_metrics[j];
-    }
-    printf("busy-cycles=%llu, gm-atomics=%llu, fs-instructions=%llu\n", diff[0],
-           diff[1], diff[2]);
-    for (int j = 0; j < 3; ++j) {
-      old_metrics[j] = new_metrics[j];
-    }
-    sleep(1);
+    hpc_gpu_adreno_common_query_perfcounters(context, values);
+    printf("  sp-busy-cycles=%" PRId64 ", sp-instructions=[vs=%" PRId64
+           ", fs=%" PRId64 ", cs=%" PRId64 "], sp-global-mem=[load=%" PRId64
+           ", store=%" PRId64 "]\n",
+           values[0], values[1], values[2], values[3], values[4], values[5]);
+
+    nanosleep(&sleep_time, &remaining_time);
   }
 
-  andreno_deactivate_perf_counter(gpu_device, ADRENO_PERFCOUNTER_GROUP_SP,
-                                  ADRENO_SP_BUSY_CYCLES);
-  andreno_deactivate_perf_counter(gpu_device, ADRENO_PERFCOUNTER_GROUP_SP,
-                                  ADRENO_SP_GM_ATOMICS);
-  andreno_deactivate_perf_counter(gpu_device, ADRENO_PERFCOUNTER_GROUP_SP,
-                                  ADRENO_SP_FS_INSTRUCTIONS);
-
-  int ret = close(gpu_device);
-  if (ret == -1) {
-    perror("close");
+  status = hpc_gpu_adreno_common_stop_perfcounters(context);
+  if (status < 0) {
+    perror("stop perfcounters");
+    return status;
+  }
+  status = hpc_gpu_adreno_common_destroy_context(context, &allocator);
+  if (status < 0) {
+    perror("destroy context");
+    return status;
   }
 
   return 0;
