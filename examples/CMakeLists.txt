@@ -1,9 +1,19 @@
 hpc_cc_binary(
   NAME
-    adreno_c_example
+    adreno_common_c_example
   SRCS
-    adreno_c_example.c
+    adreno_common_c_example.c
   DEPS
     hpc::gpu::adreno::common
+    hpc::gpu::adreno::driver_ioctl
+)
+
+hpc_cc_binary(
+  NAME
+    adreno_a6xx_c_example
+  SRCS
+    adreno_a6xx_c_example.c
+  DEPS
+    hpc::gpu::adreno::a6xx
     hpc::gpu::adreno::driver_ioctl
 )
