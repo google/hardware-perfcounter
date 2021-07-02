@@ -24,7 +24,7 @@ hpc_cc_library(
   SRCS
     common.c
   LINKOPTS
-    ::driver_ioctl
+    ::context
 )
 
 hpc_cc_library(
@@ -34,4 +34,15 @@ hpc_cc_library(
     driver_ioctl.h
   SRCS
     driver_ioctl.c
+)
+
+hpc_cc_library(
+  NAME
+    context
+  HDRS
+    context.h
+  SRCS
+    context.c
+  LINKOPTS
+    ::driver_ioctl
 )
