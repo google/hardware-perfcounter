@@ -17,6 +17,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 option(HPC_ENABLE_GPU_ADRENO "Enable support for Adreno GPUs" ON)
 
+option(HPC_BUILD_EXAMPLES "Build usage example binaries" ON)
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 #===------------------------------------------------------------------------===#
@@ -33,8 +35,10 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 list(APPEND CMAKE_MODULE_PATH ${HPC_SOURCE_ROOT}/cmake)
+
 include(hpc_utils)
 include(hpc_cc_library)
+include(hpc_cc_binary)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -45,8 +49,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 if(HPC_ENABLE_GPU_ADRENO)
   add_subdirectory(hpc/gpu/adreno)
 endif()
-
-add_executable(perfcounter main.c)
+if(HPC_BUILD_EXAMPLES)
+  add_subdirectory(examples)
+endif()
 
 #===------------------------------------------------------------------------===#
 # Utility tools
