@@ -10,7 +10,7 @@ include(CMakeParseArguments)
 # * NAME: the name of this library
 # * HDRS: the list of public headers for this library
 # * SRCS: the list of source files for this library
-# * DEPS: the list of libraries that this library depends on
+# * DEPS: the list of public libraries that this library depends on
 # * INCLUDES: the list of additional private include directories to this library
 # * COPTS: the list of private compile options
 # * LINKOPTS: the list of private link options
@@ -26,6 +26,7 @@ function(hpc_cc_library)
   hpc_package_ns(_PACKAGE_NS)
   # Use fully qualified namespaces for dependencies
   list(TRANSFORM _RULE_DEPS REPLACE "^::" "${_PACKAGE_NS}::")
+  list(TRANSFORM _RULE_LINKOPTS REPLACE "^::" "${_PACKAGE_NS}::")
 
   # Prefix the library with the package name
   hpc_package_name(_PACKAGE_NAME)
