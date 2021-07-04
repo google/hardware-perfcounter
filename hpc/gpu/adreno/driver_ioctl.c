@@ -8,7 +8,7 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#define ADRENO_IOC_TYPE 0x09
+#define ADRENO_IOCTL_TYPE 0x09
 
 // We use explicit-sized data types in APIs, but the kernel uses
 // platform-dependent ones. Generally its's fine but just double
@@ -22,44 +22,48 @@ static_assert(sizeof(uint64_t) == sizeof(unsigned long long),
 // Open/close device
 //===----------------------------------------------------------------------===//
 
-int adreno_open_gpu_device(void) { return open("/dev/kgsl-3d0", O_RDWR); }
+int hpc_gpu_adreno_ioctl_open_gpu_device(void) {
+  return open("/dev/kgsl-3d0", O_RDWR);
+}
 
-int adreno_close_gpu_device(int gpu_device) { return close(gpu_device); }
+int hpc_gpu_adreno_ioctl_close_gpu_device(int gpu_device) {
+  return close(gpu_device);
+}
 
 //===----------------------------------------------------------------------===//
 // Get device information
 //===----------------------------------------------------------------------===//
 
-#define ADRENO_PROP_DEVICE_INFO 0x1
+#define ADRENO_PROPERTY_DEVICE_INFO 0x1
 
-struct adreno_devinfo {
+struct adreno_device_info {
   unsigned int device_id;
   unsigned int chip_id;
   unsigned int mmu_enabled;
-  unsigned long gmem_gpubaseaddr;
+  unsigned long gmem_gpu_base_address;
   unsigned int gpu_id;
   size_t gmem_sizebytes;
 };
 
-struct adreno_device_getproperty {
+struct adreno_device_get_property {
   unsigned int type;
   void *value;
-  size_t sizebytes;
+  size_t num_bytes;
 };
 
-#define ADRENO_IOCTL_DEVICE_GETPROPERTY \
-  _IOWR(ADRENO_IOC_TYPE, 0x2, struct adreno_device_getproperty)
+#define ADRENO_IOCTL_DEVICE_GET_PROPERTY \
+  _IOWR(ADRENO_IOCTL_TYPE, 0x2, struct adreno_device_get_property)
 
-uint32_t adreno_get_gpu_device_id(int gpu_device) {
-  struct adreno_devinfo devinfo;
-  memset(&devinfo, 0, sizeof(struct adreno_devinfo));
+uint32_t hpc_gpu_adreno_ioctl_get_gpu_device_id(int gpu_device) {
+  struct adreno_device_info devinfo;
+  memset(&devinfo, 0, sizeof(struct adreno_device_info));
 
-  struct adreno_device_getproperty payload;
-  payload.type = ADRENO_PROP_DEVICE_INFO;
+  struct adreno_device_get_property payload;
+  payload.type = ADRENO_PROPERTY_DEVICE_INFO;
   payload.value = &devinfo;
-  payload.sizebytes = sizeof(struct adreno_devinfo);
+  payload.num_bytes = sizeof(struct adreno_device_info);
 
-  int status = ioctl(gpu_device, ADRENO_IOCTL_DEVICE_GETPROPERTY, &payload);
+  int status = ioctl(gpu_device, ADRENO_IOCTL_DEVICE_GET_PROPERTY, &payload);
   if (status < 0) return status;
 
   uint32_t chip_id = devinfo.chip_id;
@@ -82,10 +86,10 @@ struct adreno_perfcounter_get {
 };
 
 #define ADRENO_IOCTL_PERFCOUNTER_GET \
-  _IOWR(ADRENO_IOC_TYPE, 0x38, struct adreno_perfcounter_get)
+  _IOWR(ADRENO_IOCTL_TYPE, 0x38, struct adreno_perfcounter_get)
 
-int andreno_activate_perfcounter(int gpu_device, uint32_t group_id,
-                                 uint32_t countable_selector) {
+int hpc_gpu_adreno_ioctl_activate_perfcounter(int gpu_device, uint32_t group_id,
+                                              uint32_t countable_selector) {
   struct adreno_perfcounter_get payload;
   memset(&payload, 0, sizeof(struct adreno_perfcounter_get));
   payload.group_id = group_id;
@@ -105,10 +109,11 @@ struct adreno_perfcounter_put {
 };
 
 #define ADRENO_IOCTL_PERFCOUNTER_PUT \
-  _IOW(ADRENO_IOC_TYPE, 0x39, struct adreno_perfcounter_put)
+  _IOW(ADRENO_IOCTL_TYPE, 0x39, struct adreno_perfcounter_put)
 
-int andreno_deactivate_perfcounter(int gpu_device, uint32_t group_id,
-                                   uint32_t countable_selector) {
+int hpc_gpu_adreno_ioctl_deactivate_perfcounter(int gpu_device,
+                                                uint32_t group_id,
+                                                uint32_t countable_selector) {
   struct adreno_perfcounter_put payload;
   memset(&payload, 0, sizeof(struct adreno_perfcounter_put));
   payload.group_id = group_id;
@@ -122,17 +127,18 @@ int andreno_deactivate_perfcounter(int gpu_device, uint32_t group_id,
 //===----------------------------------------------------------------------===//
 
 struct adreno_perfcounter_read {
-  struct adreno_perfcounter_read_counter_t *counters;
+  struct hpc_gpu_adreno_ioctl_perfcounter_read_counter_t *counters;
   unsigned int num_counters;
   unsigned int __pad[2];
 };
 
 #define ADRENO_IOCTL_PERFCOUNTER_READ \
-  _IOWR(ADRENO_IOC_TYPE, 0x3B, struct adreno_perfcounter_read)
+  _IOWR(ADRENO_IOCTL_TYPE, 0x3B, struct adreno_perfcounter_read)
 
-int adreno_query_perfcounters(int gpu_device, uint32_t num_counters,
-                              adreno_perfcounter_read_counter_t *counters,
-                              uint64_t *values) {
+int hpc_gpu_adreno_ioctl_query_perfcounters(
+    int gpu_device, uint32_t num_counters,
+    hpc_gpu_adreno_ioctl_perfcounter_read_counter_t *counters,
+    uint64_t *values) {
   struct adreno_perfcounter_read payload;
   memset(&payload, 0, sizeof(struct adreno_perfcounter_read));
   payload.num_counters = num_counters;

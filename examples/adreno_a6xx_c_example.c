@@ -13,14 +13,14 @@ static void *allocate(void *user_data, size_t size) { return malloc(size); }
 static void deallocate(void *user_data, void *memory) { return free(memory); }
 
 int main(void) {
-  int gpu_device = adreno_open_gpu_device();
+  int gpu_device = hpc_gpu_adreno_ioctl_open_gpu_device();
   if (gpu_device < 0) perror("open GPU device");
 
-  int gpu_id = adreno_get_gpu_device_id(gpu_device);
+  int gpu_id = hpc_gpu_adreno_ioctl_get_gpu_device_id(gpu_device);
   if (gpu_id < 0) perror("query GPU ID");
   printf("[GPU] Adreno %d\n", gpu_id);
 
-  int status = adreno_close_gpu_device(gpu_device);
+  int status = hpc_gpu_adreno_ioctl_close_gpu_device(gpu_device);
   if (status < 0) perror("close GPU device");
 
   hpc_gpu_adreno_a6xx_perfcounter_t perfcounters[] = {
