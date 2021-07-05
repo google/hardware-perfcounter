@@ -1,12 +1,17 @@
 #include "hpc/gpu/mali/driver_ioctl.h"
 
+#include <errno.h>
 #include <fcntl.h>
+#include <poll.h>
 #include <stdint.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <sys/poll.h>
 #include <unistd.h>
 
 #include "hpc/gpu/allocation_callback.h"
+#include "hpc/gpu/error_code.h"
 
 //===----------------------------------------------------------------------===//
 // Open/close device
@@ -149,5 +154,131 @@ int hpc_gpu_mali_ioctl_get_gpu_device_info(
   }
 
   allocator->free(allocator->user_data, buffer);
+  return 0;
+}
+
+//===----------------------------------------------------------------------===//
+// Get hardware counter reader
+//===----------------------------------------------------------------------===//
+
+struct mali_counter_reader_setup {
+  uint32_t buffer_count;
+  uint32_t frontend_bitmask;     // Frontend counter selection bitmask
+  uint32_t shader_core_bitmask;  // Shader core counter selection bitmask
+  uint32_t tiler_bitmask;        // Tiler counter selection bitmask
+  uint32_t mmu_l2_bitmask;       // MMU L2 counter selection bitmask
+};
+
+#define MALI_IOCTL_COUNTER_SETUP_READER \
+  _IOW(MALI_IOCTL_TYPE, 8, struct mali_counter_reader_setup)
+
+struct mali_counter_reader_metadata {
+  uint64_t timestamp;
+  uint32_t event_id;
+  uint32_t buffer_index;
+};
+
+#define MALI_COUNTER_READER_IOCTL_TYPE 0xBE
+
+#define MALI_COUNTER_READER_API_VERSION 1
+
+#define MALI_COUNTER_READER_GET_HARDWARE_VERSION \
+  _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x00, uint32_t)
+#define MALI_COUNTER_READER_GET_BUFFER_SIZE \
+  _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x01, uint32_t)
+#define MALI_COUNTER_READER_DUMP \
+  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x10, uint32_t)
+#define MALI_COUNTER_READER_GET_BUFFER       \
+  _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x20, \
+       struct mali_counter_reader_metadata)
+#define MALI_COUNTER_READER_PUT_BUFFER       \
+  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x21, \
+       struct mali_counter_reader_metadata)
+#define MALI_COUNTER_READER_GET_API_VERSION \
+  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0xFF, uint32_t)
+
+int hpc_gpu_mali_ioctl_open_perfcounter_reader(
+    int gpu_device, hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader) {
+  // Request 16 buffers for dumping counters. The maximum can be 32. These
+  // buffers are organized as a ring buffer in the kernel for counter dumps.
+  // So that we can read multiple snapshots while allowing the kernel to
+  // continue dumping.
+  const uint32_t buffer_count = 16;
+  struct mali_counter_reader_setup setup = {buffer_count, ~0u, ~0u, ~0u, ~0u};
+  int reader = ioctl(gpu_device, MALI_IOCTL_COUNTER_SETUP_READER, &setup);
+  if (reader < 0) return reader;
+
+  uint32_t version;
+
+  // Make sure the driver is at the same API version.
+  int status = ioctl(reader, MALI_COUNTER_READER_GET_API_VERSION, &version);
+  if (status < 0) return status;
+  if (version != MALI_COUNTER_READER_API_VERSION) {
+    return -HPC_GPU_ERROR_INCOMPATIBLE_DEVICE;
+  }
+
+  // Mali-T6xx or Mali-T72x are v4 GPU devices. They are quite old.
+  // Don't support them right now.
+  status = ioctl(reader, MALI_COUNTER_READER_GET_HARDWARE_VERSION, &version);
+  if (status < 0) return status;
+  if (version < 5) return -HPC_GPU_ERROR_INCOMPATIBLE_DEVICE;
+
+  uint32_t buffer_size = 0;
+  status = ioctl(reader, MALI_COUNTER_READER_GET_BUFFER_SIZE, &buffer_size);
+  if (status < 0) return status;
+
+  // Get a pointer to the counter buffers in the kernel.
+  uint8_t *buffer =
+      mmap(NULL, buffer_count * buffer_size, PROT_READ, MAP_PRIVATE, reader, 0);
+  if (buffer == MAP_FAILED) return errno;
+
+  counter_reader->reader_fd = reader;
+  counter_reader->single_buffer_size = buffer_size;
+  counter_reader->buffer_count = buffer_count;
+  counter_reader->whole_kernel_buffer = buffer;
+  return 0;
+}
+
+int hpc_gpu_mali_ioctl_close_perfcounter_reader(
+    hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader) {
+  return close(counter_reader->reader_fd);
+}
+
+//===----------------------------------------------------------------------===//
+// Get hardware counter reader
+//===----------------------------------------------------------------------===//
+
+int hpc_gpu_mali_ioctl_query_perfcounters(
+    const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader, void *values,
+    uint64_t *timestamp) {
+  int reader = counter_reader->reader_fd;
+  int status = ioctl(reader, MALI_COUNTER_READER_DUMP, 0);
+  if (status < 0) return status;
+
+  struct pollfd poll_counters;
+  poll_counters.fd = reader;
+  poll_counters.events = POLLIN;
+  poll_counters.revents = 0;
+
+  status = poll(&poll_counters, 1, /*timeout=*/-1);
+  if (status < 0) return status;
+  if (poll_counters.revents & POLLHUP) return -HPC_GPU_ERROR_DRIVER_HUNGUP;
+
+  if (poll_counters.revents & POLLIN) {
+    struct mali_counter_reader_metadata metadata;
+
+    status = ioctl(reader, MALI_COUNTER_READER_GET_BUFFER, &metadata);
+    if (status < 0) return status;
+
+    uint32_t offset =
+        counter_reader->single_buffer_size * metadata.buffer_index;
+    memcpy(values, counter_reader->whole_kernel_buffer + offset,
+           counter_reader->single_buffer_size);
+    *timestamp = metadata.timestamp;
+
+    status = ioctl(reader, MALI_COUNTER_READER_PUT_BUFFER, &metadata);
+    if (status < 0) return status;
+  }
+
   return 0;
 }

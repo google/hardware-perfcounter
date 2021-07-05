@@ -25,4 +25,21 @@ int hpc_gpu_mali_ioctl_get_gpu_device_info(
     int gpu_device, const hpc_gpu_host_allocation_callbacks_t *allocator,
     hpc_gpu_mali_ioctl_gpu_device_info_t *info);
 
+typedef struct hpc_gpu_mali_ioctl_perfcounter_reader_t {
+  uint32_t single_buffer_size;
+  uint32_t buffer_count;
+  uint8_t *whole_kernel_buffer;
+  int reader_fd;
+} hpc_gpu_mali_ioctl_perfcounter_reader_t;
+
+int hpc_gpu_mali_ioctl_open_perfcounter_reader(
+    int gpu_device, hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader);
+
+int hpc_gpu_mali_ioctl_close_perfcounter_reader(
+    hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader);
+
+int hpc_gpu_mali_ioctl_query_perfcounters(
+    const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader, void *values,
+    uint64_t *timestamp);
+
 #endif  // HPC_GPU_MALI_DRIVER_IOCTL_H_

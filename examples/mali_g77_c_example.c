@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "hpc/gpu/mali/driver_ioctl.h"
 
@@ -19,7 +20,7 @@ int main() {
   uint16_t major_version = 0, minor_version = 0;
   int status = hpc_gpu_mali_ioctl_setup_api_version(gpu_device, &major_version,
                                                     &minor_version);
-  if (gpu_device < 0) return perror("setup API version"), gpu_device;
+  if (status < 0) return perror("setup API version"), status;
 
   printf("Kernel API version: %" PRIu16 ".%" PRIu16 "\n", major_version,
          minor_version);
@@ -27,7 +28,7 @@ int main() {
   // Then setup the kernel API context. This is also necessary for future
   // interactions with the kernel driver.
   status = hpc_gpu_mali_ioctl_setup_api_context(gpu_device);
-  if (gpu_device < 0) return perror("setup API context"), gpu_device;
+  if (status < 0) return perror("setup API context"), status;
 
   hpc_gpu_host_allocation_callbacks_t allocator = {NULL, &allocate,
                                                    &deallocate};
@@ -35,14 +36,45 @@ int main() {
   hpc_gpu_mali_ioctl_gpu_device_info_t device_info;
   status = hpc_gpu_mali_ioctl_get_gpu_device_info(gpu_device, &allocator,
                                                   &device_info);
-  if (gpu_device < 0) return perror("query GPU information"), gpu_device;
+  if (status < 0) return perror("query GPU information"), status;
 
   printf("Product ID: %d\nCore mask: %d\nL2 slice count: %d\n",
          device_info.gpu_product_id, device_info.shader_core_mask,
          device_info.num_l2_slices);
 
+  hpc_gpu_mali_ioctl_perfcounter_reader_t counter_reader;
+  status =
+      hpc_gpu_mali_ioctl_open_perfcounter_reader(gpu_device, &counter_reader);
+  if (status < 0) return perror("get counter reader"), status;
+
+  printf("Single buffer size: %d\n", counter_reader.single_buffer_size);
+
+  uint32_t *values = malloc(counter_reader.single_buffer_size);
+
+  struct timespec sleep_time, remaining_time;
+  sleep_time.tv_sec = 0;
+  sleep_time.tv_nsec = 100000000;  // 100ms
+
+  for (int i = 0; i < 100; ++i) {
+    uint64_t timestamp = 0;
+    status = hpc_gpu_mali_ioctl_query_perfcounters(&counter_reader, values,
+                                                   &timestamp);
+    if (status < 0) return perror("sample GPU counters"), status;
+
+    printf("Timestamp: %" PRIu64 "\n", timestamp);
+    for (int j = 0; j < 10; ++j) printf("  %d", values[j]);
+    printf("\n");
+
+    nanosleep(&sleep_time, &remaining_time);
+  }
+
+  free(values);
+
+  status = hpc_gpu_mali_ioctl_close_perfcounter_reader(&counter_reader);
+  if (status < 0) return perror("close counter reader"), status;
+
   status = hpc_gpu_mali_ioctl_close_gpu_device(gpu_device);
-  if (gpu_device < 0) return perror("close GPU device"), status;
+  if (status < 0) return perror("close GPU device"), status;
 
   return 0;
 }
