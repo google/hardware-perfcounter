@@ -42,6 +42,12 @@ struct mali_context_set_creation_flags {
 #define MALI_PROPERTY_MAX_TASK_QUEUE 22
 #define MALI_PROPERTY_MAX_THREAD_GROUP_SPLIT 23
 #define MALI_PROPERTY_RAW_GPU_ID 55
+#define MALI_PROPERTY_COHERENCY_NUM_GROUPS 61
+#define MALI_PROPERTY_COHERENCY_NUM_CORE_GROUPS 62
+#define MALI_PROPERTY_COHERENCY_COHERENCY 63
+
+#define MALI_PROPERTY_COHERENCY_GROUP_0 64
+#define MALI_PROPERTY_COHERENCY_GROUP_15 79
 
 struct mali_device_properties {
   uint32_t id;
@@ -100,6 +106,9 @@ int main() {
       {MALI_PROPERTY_MAX_TASK_QUEUE, "Max task queue"},
       {MALI_PROPERTY_MAX_THREAD_GROUP_SPLIT, "Max threadgroup split"},
       {MALI_PROPERTY_RAW_GPU_ID, "GPU ID"},
+      {MALI_PROPERTY_COHERENCY_NUM_GROUPS, "Coherency # groups"},
+      {MALI_PROPERTY_COHERENCY_NUM_CORE_GROUPS, "Coherency # core groups"},
+      {MALI_PROPERTY_COHERENCY_COHERENCY, "Coherency status"},
   };
 
   uint32_t num_properties =
@@ -136,6 +145,11 @@ int main() {
       if (selected_properties[i].id == property_id) {
         printf("  %s: %" PRId64 "\n", selected_properties[i].name, value);
       }
+    }
+    if (MALI_PROPERTY_COHERENCY_GROUP_0 <= property_id &&
+        property_id <= MALI_PROPERTY_COHERENCY_GROUP_15) {
+      uint32_t group_id = property_id - MALI_PROPERTY_COHERENCY_GROUP_0;
+      printf("  Coherency group #%d core mask: %" PRId64 "\n", group_id, value);
     }
   }
 
