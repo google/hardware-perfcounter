@@ -86,13 +86,13 @@ ADRENO_C_ENUM_CASE_VALUE = "HPC_GPU_ADRENO_{series}_{group}_{symbol} = {value},"
 
 # Code templates for generating perfcounter conversion functions
 ADRENO_ENUM_VALUE_TO_SELECTOR_DIRECT_FN = """
-inline uint32_t adreno_{series}_perfcounter_get_selector(
+static inline uint32_t adreno_{series}_perfcounter_get_selector(
     hpc_gpu_adreno_{series}_perfcounter_t perfcounter) {{
   {selector_logic}
 }}
 """
 ADRENO_ENUM_VALUE_TO_SELECTOR_SWITCH_FN = """
-uint32_t adreno_common_perfcounter_convert_to_{series}(
+static uint32_t adreno_common_perfcounter_convert_to_{series}(
     hpc_gpu_adreno_common_perfcounter_t perfcounter) {{
   // clang-format off
   switch (perfcounter) {{
@@ -102,7 +102,7 @@ uint32_t adreno_common_perfcounter_convert_to_{series}(
 }}
 """
 ADRENO_ENUM_VALUE_TO_GROUP_FN = """
-inline uint32_t adreno_{series}_perfcounter_get_group(
+static inline uint32_t adreno_{series}_perfcounter_get_group(
     hpc_gpu_adreno_{series}_perfcounter_t perfcounter) {{
   {group_logic}
 }}
