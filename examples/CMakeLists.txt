@@ -27,4 +27,13 @@ if(HPC_ENABLE_GPU_MALI)
     SRCS
       mali_print_info.c
   )
+
+  hpc_cc_binary(
+    NAME
+      mali_g77_c_example
+    SRCS
+      mali_g77_c_example.c
+    DEPS
+      hpc::gpu::mali::driver_ioctl
+  )
 endif(HPC_ENABLE_GPU_MALI)
