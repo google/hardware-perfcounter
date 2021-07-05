@@ -15,7 +15,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Overall functionality controls
 #===------------------------------------------------------------------------===#
 
-option(HPC_ENABLE_GPU_ADRENO "Enable support for Adreno GPUs" ON)
+option(HPC_ENABLE_GPU_ADRENO "Enable support for Qualcomm Adreno GPUs" ON)
+option(HPC_ENABLE_GPU_MALI   "Enable support for ARM Mali GPUs" ON)
 
 option(HPC_BUILD_EXAMPLES "Build usage example binaries" ON)
 
