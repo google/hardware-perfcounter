@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "hpc/gpu/adreno/driver_ioctl.h"
-#include "hpc/gpu/allocation_callback.h"
+#include "hpc/gpu/base_utilities.h"
 
 /// Adreno GPU series.
 typedef enum hpc_gpu_adreno_series_e {

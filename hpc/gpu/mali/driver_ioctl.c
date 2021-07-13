@@ -10,8 +10,7 @@
 #include <sys/poll.h>
 #include <unistd.h>
 
-#include "hpc/gpu/allocation_callback.h"
-#include "hpc/gpu/error_code.h"
+#include "hpc/gpu/base_utilities.h"
 
 //===----------------------------------------------------------------------===//
 // Open/close device

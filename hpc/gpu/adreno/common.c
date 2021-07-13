@@ -5,8 +5,7 @@
 #include <unistd.h>
 
 #include "hpc/gpu/adreno/context.h"
-#include "hpc/gpu/allocation_callback.h"
-#include "hpc/gpu/error_code.h"
+#include "hpc/gpu/base_utilities.h"
 
 static uint32_t adreno_common_perfcounter_get_group(
     hpc_gpu_adreno_common_perfcounter_t perfcounter);

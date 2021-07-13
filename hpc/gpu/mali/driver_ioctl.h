@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "hpc/gpu/allocation_callback.h"
+#include "hpc/gpu/base_utilities.h"
 
 int hpc_gpu_mali_ioctl_open_gpu_device(void);
 

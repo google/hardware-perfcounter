@@ -6,8 +6,7 @@
 
 #include "hpc/gpu/adreno/a6xx.h"
 #include "hpc/gpu/adreno/driver_ioctl.h"
-#include "hpc/gpu/allocation_callback.h"
-#include "hpc/gpu/error_code.h"
+#include "hpc/gpu/base_utilities.h"
 
 static void *allocate(void *user_data, size_t size) { return malloc(size); }
 static void deallocate(void *user_data, void *memory) { return free(memory); }

@@ -4,7 +4,7 @@
 #include <string.h>  // For memset
 #include <unistd.h>  // For close
 
-#include "hpc/gpu/error_code.h"
+#include "hpc/gpu/base_utilities.h"
 
 hpc_gpu_adreno_series_t hpc_gpu_adreno_get_series(int gpu_id) {
   if ((gpu_id >= 600 && gpu_id < 700) || gpu_id == 702)

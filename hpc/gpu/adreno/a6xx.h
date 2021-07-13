@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "hpc/gpu/allocation_callback.h"
+#include "hpc/gpu/base_utilities.h"
 
 // Forward declaration of the perfcounter enum
 typedef enum hpc_gpu_adreno_a6xx_perfcounter_e
