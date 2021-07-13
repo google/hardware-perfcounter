@@ -20,13 +20,13 @@ typedef enum hpc_gpu_adreno_series_e {
 /// @param[in] gpu_id The GPU ID (e.g., 540, 650, etc.)
 hpc_gpu_adreno_series_t hpc_gpu_adreno_get_series(int gpu_id);
 
-/// Adreno perfcounter context.
+/// Adreno counter context.
 typedef struct hpc_gpu_adreno_context_t {
-  /// The list of perfcounters to sample.
-  hpc_gpu_adreno_ioctl_perfcounter_read_counter_t *counters;
-  /// The previous sampled values of perfcounters.
+  /// The list of counters to sample.
+  hpc_gpu_adreno_ioctl_counter_read_counter_t *counters;
+  /// The previous sampled values of counters.
   uint64_t *prev_values;
-  /// The number of perfcounters.
+  /// The number of counters.
   uint32_t num_counters;
   /// The current GPU's ID.
   uint32_t gpu_id;
@@ -34,7 +34,7 @@ typedef struct hpc_gpu_adreno_context_t {
   int gpu_device;
 } hpc_gpu_adreno_context_t;
 
-/// Creates a context for Adreno GPU perfcounters.
+/// Creates a context for Adreno GPU counters.
 ///
 /// Note that this function performs necessary allocation for counters, but it
 /// won't decode the `counters` into their groups and selectors. The caller is
@@ -52,7 +52,7 @@ int hpc_gpu_adreno_create_context(
     const hpc_gpu_host_allocation_callbacks_t *allocator,
     hpc_gpu_adreno_context_t **out_context);
 
-/// Destroys the context for Adreno GPU perfcounters.
+/// Destroys the context for Adreno GPU counters.
 ///
 /// @param[in] context   The counter sampling context.
 /// @param[in] allocator The allocator used to free allocated host memory.
@@ -60,30 +60,29 @@ int hpc_gpu_adreno_destroy_context(
     hpc_gpu_adreno_context_t *context,
     const hpc_gpu_host_allocation_callbacks_t *allocator);
 
-/// Starts sampling Adreno GPU perfcounters specified when creating the context.
+/// Starts sampling Adreno GPU counters specified when creating the context.
 ///
 /// This activates the registered counters and reads their initial values in
 /// preparation for continously sampling.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_adreno_context_start_perfcounters(
-    hpc_gpu_adreno_context_t *context);
+int hpc_gpu_adreno_context_start_counters(hpc_gpu_adreno_context_t *context);
 
-/// Stops sampling Adreno GPU perfcounters specified when creating the context.
+/// Stops sampling Adreno GPU counters specified when creating the context.
 ///
 /// This deactivates the registered counters.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_adreno_context_stop_perfcounters(hpc_gpu_adreno_context_t *context);
+int hpc_gpu_adreno_context_stop_counters(hpc_gpu_adreno_context_t *context);
 
-/// Samples Adreno GPU perfcounters specified when creating the context.
+/// Samples Adreno GPU counters specified when creating the context.
 ///
 /// @param[in]  context The counter sampling context.
 /// @param[out] values  The pointer to the memory for receiving newly sampled
 ///                     values. Its element count should be greater than or
-///                     equal to the number of perfcounters specified when
+///                     equal to the number of counters specified when
 ///                     creating the `context`.
-int hpc_gpu_adreno_context_query_perfcounters(hpc_gpu_adreno_context_t *context,
-                                              uint64_t *values);
+int hpc_gpu_adreno_context_query_counters(hpc_gpu_adreno_context_t *context,
+                                          uint64_t *values);
 
 #endif  // HPC_GPU_ADRENO_CONTEXT_H_

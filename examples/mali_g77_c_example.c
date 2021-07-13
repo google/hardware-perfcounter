@@ -51,9 +51,8 @@ int main() {
          device_info.gpu_product_id, device_info.shader_core_mask,
          device_info.num_l2_slices);
 
-  hpc_gpu_mali_ioctl_perfcounter_reader_t counter_reader;
-  status =
-      hpc_gpu_mali_ioctl_open_perfcounter_reader(gpu_device, &counter_reader);
+  hpc_gpu_mali_ioctl_counter_reader_t counter_reader;
+  status = hpc_gpu_mali_ioctl_open_counter_reader(gpu_device, &counter_reader);
   if (status < 0) return print_error(status, "get counter reader");
 
   printf("Single buffer size: %d\n", counter_reader.single_buffer_size);
@@ -66,8 +65,8 @@ int main() {
 
   for (int i = 0; i < 100; ++i) {
     uint64_t timestamp = 0;
-    status = hpc_gpu_mali_ioctl_query_perfcounters(&counter_reader, values,
-                                                   &timestamp);
+    status =
+        hpc_gpu_mali_ioctl_query_counters(&counter_reader, values, &timestamp);
     if (status < 0) return print_error(status, "sample GPU counters");
 
     printf("Timestamp: %" PRIu64 "\n", timestamp);
@@ -79,7 +78,7 @@ int main() {
 
   free(values);
 
-  status = hpc_gpu_mali_ioctl_close_perfcounter_reader(&counter_reader);
+  status = hpc_gpu_mali_ioctl_close_counter_reader(&counter_reader);
   if (status < 0) return print_error(status, "close counter reader");
 
   status = hpc_gpu_mali_ioctl_close_gpu_device(gpu_device);

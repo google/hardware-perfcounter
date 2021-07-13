@@ -16,41 +16,39 @@ int hpc_gpu_adreno_ioctl_close_gpu_device(int gpu_device);
 /// @param[in] gpu_device The file descriptor for the GPU device.
 uint32_t hpc_gpu_adreno_ioctl_get_gpu_device_id(int gpu_device);
 
-/// Activates an Adreno perfcounter.
+/// Activates an Adreno counter.
 ///
 /// @param[in] gpu_device         The file descriptor for the GPU device.
-/// @param[in] group_id           The perfcounter's group ID.
-/// @param[in] countable_selector The perfcounter's selector.
-int hpc_gpu_adreno_ioctl_activate_perfcounter(int gpu_device, uint32_t group_id,
-                                              uint32_t countable_selector);
+/// @param[in] group_id           The counter's group ID.
+/// @param[in] countable_selector The counter's selector.
+int hpc_gpu_adreno_ioctl_activate_counter(int gpu_device, uint32_t group_id,
+                                          uint32_t countable_selector);
 
-/// Deactivates an Adreno perfcounter.
+/// Deactivates an Adreno counter.
 ///
 /// @param[in] gpu_device         The file descriptor for the GPU device.
-/// @param[in] group_id           The perfcounter's group ID.
-/// @param[in] countable_selector The perfcounter's selector.
-int hpc_gpu_adreno_ioctl_deactivate_perfcounter(int gpu_device,
-                                                uint32_t group_id,
-                                                uint32_t countable_selector);
+/// @param[in] group_id           The counter's group ID.
+/// @param[in] countable_selector The counter's selector.
+int hpc_gpu_adreno_ioctl_deactivate_counter(int gpu_device, uint32_t group_id,
+                                            uint32_t countable_selector);
 
-typedef struct hpc_gpu_adreno_ioctl_perfcounter_read_counter_t {
+typedef struct hpc_gpu_adreno_ioctl_counter_read_counter_t {
   uint32_t group_id;
   uint32_t countable_selector;
   uint64_t value;
-} hpc_gpu_adreno_ioctl_perfcounter_read_counter_t;
+} hpc_gpu_adreno_ioctl_counter_read_counter_t;
 
-/// Samples multiple Adreno perfcounters.
+/// Samples multiple Adreno counters.
 ///
 /// @param[in]  gpu_device   The file descriptor for the GPU device.
 /// @param[in]  num_counters The number of counters to sample.
 /// @param[in]  counters     The list of counters to sample.
 /// @param[out] values       The pointer to memory to receive sampled values.
 ///                          Its element count should be greater than or
-///                          equal to the number of perfcounters specified when
+///                          equal to the number of counters specified when
 ///                          creating the `context`.
-int hpc_gpu_adreno_ioctl_query_perfcounters(
+int hpc_gpu_adreno_ioctl_query_counters(
     int gpu_device, uint32_t num_counters,
-    hpc_gpu_adreno_ioctl_perfcounter_read_counter_t *counters,
-    uint64_t *values);
+    hpc_gpu_adreno_ioctl_counter_read_counter_t *counters, uint64_t *values);
 
 #endif  // HPC_GPU_ADRENO_DRIVER_IOCTL_H_

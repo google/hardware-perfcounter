@@ -67,7 +67,7 @@ typedef struct hpc_gpu_mali_context_t {
   hpc_gpu_mali_ioctl_gpu_device_info_t device_info;
 
   /// The current counter reader.
-  struct hpc_gpu_mali_ioctl_perfcounter_reader_t counter_reader;
+  struct hpc_gpu_mali_ioctl_counter_reader_t counter_reader;
 } hpc_gpu_mali_context_t;
 
 static uint32_t popcount(uint32_t x) {
@@ -111,9 +111,8 @@ int hpc_gpu_mali_create_context(
   }
 
   // Now it's time to set up the counter reader.
-  hpc_gpu_mali_ioctl_perfcounter_reader_t counter_reader;
-  status =
-      hpc_gpu_mali_ioctl_open_perfcounter_reader(gpu_device, &counter_reader);
+  hpc_gpu_mali_ioctl_counter_reader_t counter_reader;
+  status = hpc_gpu_mali_ioctl_open_counter_reader(gpu_device, &counter_reader);
   if (status < 0) return status;
 
   // Allocate memory for the context itself.
@@ -161,7 +160,7 @@ int hpc_gpu_mali_destroy_context(
     hpc_gpu_mali_context_t *context,
     const hpc_gpu_host_allocation_callbacks_t *allocator) {
   int status =
-      hpc_gpu_mali_ioctl_close_perfcounter_reader(&context->counter_reader);
+      hpc_gpu_mali_ioctl_close_counter_reader(&context->counter_reader);
   if (status < 0) return status;
   status = hpc_gpu_mali_ioctl_close_gpu_device(context->gpu_device);
   if (status < 0) return status;
@@ -173,7 +172,7 @@ int hpc_gpu_mali_destroy_context(
 }
 
 int hpc_gpu_mali_context_start_counters(hpc_gpu_mali_context_t *context) {
-  return hpc_gpu_mali_ioctl_zero_perfcounters(&context->counter_reader);
+  return hpc_gpu_mali_ioctl_zero_counters(&context->counter_reader);
 }
 
 int hpc_gpu_mali_context_stop_counters(hpc_gpu_mali_context_t *context) {
@@ -185,7 +184,7 @@ int hpc_gpu_mali_context_query_counters(hpc_gpu_mali_context_t *context,
                                         uint64_t *values) {
   // Get a new sample of all perf counters.
   uint64_t timestamp = 0;
-  int status = hpc_gpu_mali_ioctl_query_perfcounters(
+  int status = hpc_gpu_mali_ioctl_query_counters(
       &context->counter_reader, context->query_buffer, &timestamp);
   if (status < 0) return status;
 

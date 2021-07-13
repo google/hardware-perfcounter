@@ -62,7 +62,7 @@ struct mali_context_set_creation_flags {
 
 int hpc_gpu_mali_ioctl_setup_api_context(int gpu_device) {
   struct mali_context_set_creation_flags flags;
-  // We just want to sample perfcounters. So disable submission.
+  // We just want to sample counters. So disable submission.
   flags.flags = MALI_CONTEXT_DISABLE_SUBMISSION;
   return ioctl(gpu_device, MALI_IOCTL_SET_CONTEXT_CREATION_FLAGS, &flags);
 }
@@ -198,8 +198,8 @@ struct mali_counter_reader_metadata {
 #define MALI_COUNTER_READER_GET_API_VERSION \
   _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0xFF, uint32_t)
 
-int hpc_gpu_mali_ioctl_open_perfcounter_reader(
-    int gpu_device, hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader) {
+int hpc_gpu_mali_ioctl_open_counter_reader(
+    int gpu_device, hpc_gpu_mali_ioctl_counter_reader_t *counter_reader) {
   // Request 16 buffers for dumping counters. The maximum can be 32. These
   // buffers are organized as a ring buffer in the kernel for counter dumps.
   // So that we can read multiple snapshots while allowing the kernel to
@@ -240,8 +240,8 @@ int hpc_gpu_mali_ioctl_open_perfcounter_reader(
   return 0;
 }
 
-int hpc_gpu_mali_ioctl_close_perfcounter_reader(
-    hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader) {
+int hpc_gpu_mali_ioctl_close_counter_reader(
+    hpc_gpu_mali_ioctl_counter_reader_t *counter_reader) {
   return close(counter_reader->reader_fd);
 }
 
@@ -249,14 +249,14 @@ int hpc_gpu_mali_ioctl_close_perfcounter_reader(
 // Query perf counters
 //===----------------------------------------------------------------------===//
 
-int hpc_gpu_mali_ioctl_zero_perfcounters(
-    const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader) {
+int hpc_gpu_mali_ioctl_zero_counters(
+    const hpc_gpu_mali_ioctl_counter_reader_t *counter_reader) {
   int reader = counter_reader->reader_fd;
   return ioctl(reader, MALI_COUNTER_READER_CLEAR, 0);
 }
 
-int hpc_gpu_mali_ioctl_query_perfcounters(
-    const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader, void *values,
+int hpc_gpu_mali_ioctl_query_counters(
+    const hpc_gpu_mali_ioctl_counter_reader_t *counter_reader, void *values,
     uint64_t *timestamp) {
   int reader = counter_reader->reader_fd;
   int status = ioctl(reader, MALI_COUNTER_READER_DUMP, 0);

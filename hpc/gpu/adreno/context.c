@@ -21,7 +21,7 @@ int hpc_gpu_adreno_create_context(
       allocator->alloc(allocator->user_data, sizeof(hpc_gpu_adreno_context_t));
 
   size_t counter_size =
-      num_counters * sizeof(hpc_gpu_adreno_ioctl_perfcounter_read_counter_t);
+      num_counters * sizeof(hpc_gpu_adreno_ioctl_counter_read_counter_t);
   context->counters = allocator->alloc(allocator->user_data, counter_size);
   memset(context->counters, 0, counter_size);
 
@@ -56,9 +56,8 @@ int hpc_gpu_adreno_destroy_context(
   return 0;
 }
 
-int hpc_gpu_adreno_context_start_perfcounters(
-    hpc_gpu_adreno_context_t *context) {
-  // Activate all selected perfcounters
+int hpc_gpu_adreno_context_start_counters(hpc_gpu_adreno_context_t *context) {
+  // Activate all selected counters
   hpc_gpu_adreno_series_t series = hpc_gpu_adreno_get_series(context->gpu_id);
   switch (series) {
     case HPC_GPU_ADRENO_SERIES_UNKNOWN:
@@ -67,7 +66,7 @@ int hpc_gpu_adreno_context_start_perfcounters(
       return 0;
     case HPC_GPU_ADRENO_SERIES_A6XX:
       for (int i = 0; i < context->num_counters; ++i) {
-        int status = hpc_gpu_adreno_ioctl_activate_perfcounter(
+        int status = hpc_gpu_adreno_ioctl_activate_counter(
             context->gpu_device, context->counters[i].group_id,
             context->counters[i].countable_selector);
         if (status < 0) return status;
@@ -75,7 +74,7 @@ int hpc_gpu_adreno_context_start_perfcounters(
       break;
     case HPC_GPU_ADRENO_SERIES_A5XX:
       for (int i = 0; i < context->num_counters; ++i) {
-        int status = hpc_gpu_adreno_ioctl_activate_perfcounter(
+        int status = hpc_gpu_adreno_ioctl_activate_counter(
             context->gpu_device, context->counters[i].group_id,
             context->counters[i].countable_selector);
         if (status < 0) return status;
@@ -84,7 +83,7 @@ int hpc_gpu_adreno_context_start_perfcounters(
   }
 
   // Query their initial values
-  int status = hpc_gpu_adreno_ioctl_query_perfcounters(
+  int status = hpc_gpu_adreno_ioctl_query_counters(
       context->gpu_device, context->num_counters, context->counters,
       context->prev_values);
   if (status < 0) return status;
@@ -92,8 +91,7 @@ int hpc_gpu_adreno_context_start_perfcounters(
   return 0;
 }
 
-int hpc_gpu_adreno_context_stop_perfcounters(
-    hpc_gpu_adreno_context_t *context) {
+int hpc_gpu_adreno_context_stop_counters(hpc_gpu_adreno_context_t *context) {
   hpc_gpu_adreno_series_t series = hpc_gpu_adreno_get_series(context->gpu_id);
   switch (series) {
     case HPC_GPU_ADRENO_SERIES_UNKNOWN:
@@ -102,7 +100,7 @@ int hpc_gpu_adreno_context_stop_perfcounters(
       return 0;
     case HPC_GPU_ADRENO_SERIES_A6XX:
       for (int i = 0; i < context->num_counters; ++i) {
-        int status = hpc_gpu_adreno_ioctl_deactivate_perfcounter(
+        int status = hpc_gpu_adreno_ioctl_deactivate_counter(
             context->gpu_device, context->counters[i].group_id,
             context->counters[i].countable_selector);
         if (status < 0) return status;
@@ -110,7 +108,7 @@ int hpc_gpu_adreno_context_stop_perfcounters(
       break;
     case HPC_GPU_ADRENO_SERIES_A5XX:
       for (int i = 0; i < context->num_counters; ++i) {
-        int status = hpc_gpu_adreno_ioctl_deactivate_perfcounter(
+        int status = hpc_gpu_adreno_ioctl_deactivate_counter(
             context->gpu_device, context->counters[i].group_id,
             context->counters[i].countable_selector);
         if (status < 0) return status;
@@ -120,9 +118,9 @@ int hpc_gpu_adreno_context_stop_perfcounters(
   return 0;
 }
 
-int hpc_gpu_adreno_context_query_perfcounters(hpc_gpu_adreno_context_t *context,
-                                              uint64_t *values) {
-  int status = hpc_gpu_adreno_ioctl_query_perfcounters(
+int hpc_gpu_adreno_context_query_counters(hpc_gpu_adreno_context_t *context,
+                                          uint64_t *values) {
+  int status = hpc_gpu_adreno_ioctl_query_counters(
       context->gpu_device, context->num_counters, context->counters, values);
   for (int i = 0; i < context->num_counters; ++i) {
     uint64_t value = values[i];
