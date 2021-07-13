@@ -37,7 +37,10 @@ if(Python3_Interpreter_FOUND)
 
   add_custom_command(
     OUTPUT
-      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/product.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/context.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/context.c"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/common.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/common.c"
     COMMAND
       "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/generate_mali_definitions.py"
@@ -53,6 +56,9 @@ if(Python3_Interpreter_FOUND)
 
   add_custom_target(hpc-mali-definitions
     DEPENDS
-      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/product.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/context.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/context.c"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/common.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/common.c"
   )
 endif(Python3_Interpreter_FOUND)

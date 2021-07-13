@@ -15,7 +15,7 @@ LAYOUT_IGNORE_LIST = ["T60X", "T62X", "T72X", "T76X"]
 
 # Each category can only have up to 64 counters. So actually we can use 6 here.
 # But it is fine to be a bit generous.
-MALI_COUUNTER_CATEGORY_NUM_BITS = 8
+MALI_COUNTER_CATEGORY_NUM_BITS = 8
 
 MALI_COUNTER_CATEGORIES = {
     "JOB_MANAGER": 0,
@@ -35,7 +35,7 @@ typedef enum hpc_gpu_mali_counter_layout_e {{
 }} hpc_gpu_mali_counter_layout_t;
 """
 MALI_GET_LAYOUT_FN = """
-hpc_gpu_mali_counter_layout_t hpc_gpu_mali_get_layout(uint16_t gpu_id) {{
+hpc_gpu_mali_counter_layout_t hpc_gpu_mali_get_counter_layout(uint16_t gpu_id) {{
   {cases}
 }}
 """
@@ -49,12 +49,12 @@ typedef enum hpc_gpu_mali_{group}_counter_e {{
 }} hpc_gpu_mali_{group}_counter_t;
 """
 
+# Code templates for Mali counter conversion definitions
 MALI_COUNTER_CONVERSION_CASE = "case HPC_GPU_MALI_{group}_{category}_{counter}: return {value};"
 MALI_COUNTER_CONVERSION_SWITCH_FN = """
-static uint32_t hpc_gpu_mali_{group}_counter_convert_to_{layout}(
-    hpc_gpu_mali_{group}_counter_t counter) {{
+static uint32_t hpc_gpu_mali_{group}_counter_convert_to_{layout}(uint32_t counter) {{
   // clang-format off
-  switch (counter) {{
+  switch ((hpc_gpu_mali_{group}_counter_t)counter) {{
     {cases}
   }}
   // clang-format on
@@ -62,8 +62,23 @@ static uint32_t hpc_gpu_mali_{group}_counter_convert_to_{layout}(
 """
 MALI_COUNTER_CONVERSION_DIRECT_FN = """
 static inline uint32_t hpc_gpu_mali_{group}_counter_convert_to_{layout}(
-    hpc_gpu_mali_{group}_counter_t counter) {{
+    uint32_t counter) {{
   return counter & ((1u << {bits}u) - 1u);
+}}
+"""
+
+# Code templates for Mali counter layout conversion definitions
+MALI_LAYOUT_CONVERSION_CASE = ("case {prefix}{ulayout}: return hpc_gpu_mali_"
+                               "{group}_counter_convert_to_{llayout}(counter);")
+MALI_LAYOUT_CONVERSION_SWITCH_FN = """
+static uint32_t hpc_gpu_mali_{group}_counter_convert(
+    uint32_t counter, hpc_gpu_mali_counter_layout_t layout) {{
+  // clang-format off
+  switch (layout) {{
+    {cases}
+    default: assert(0 && "should not happen!"); return ~0u;
+  }}
+  // clang-format on
 }}
 """
 
@@ -208,7 +223,7 @@ class MaliDatabase:
       for name, category in common_counters.items():
         for counter in category:
           value = (MALI_COUNTER_CATEGORIES[name] <<
-                   MALI_COUUNTER_CATEGORY_NUM_BITS) + counter.index
+                   MALI_COUNTER_CATEGORY_NUM_BITS) + counter.index
           counters.append(
               MALI_COUNTER_ENUM_CASE.format(group=group.upper(),
                                             category=name.upper(),
@@ -230,7 +245,13 @@ class MaliDatabase:
       common_counters, same_index = self._get_common_counter_for_layouts(
           layouts)
 
+      layout_cases = []
       for target_layout in layouts:
+        layout_cases.append(
+            MALI_LAYOUT_CONVERSION_CASE.format(prefix=MALI_LAYOUT_ENUM_PREFIX,
+                                               group=group,
+                                               ulayout=target_layout.upper(),
+                                               llayout=target_layout.lower()))
 
         # If for any common counter, it has the same index across all products,
         # we can just directly extract the index.
@@ -238,7 +259,7 @@ class MaliDatabase:
           all_fns += MALI_COUNTER_CONVERSION_DIRECT_FN.format(
               group=group,
               layout=target_layout.lower(),
-              bits=MALI_COUUNTER_CATEGORY_NUM_BITS)
+              bits=MALI_COUNTER_CATEGORY_NUM_BITS)
           continue
 
         cases = []
@@ -254,7 +275,27 @@ class MaliDatabase:
             layout=target_layout.lower(),
             cases="\n    ".join(cases))
 
+      all_fns += MALI_LAYOUT_CONVERSION_SWITCH_FN.format(
+          group=group, cases="\n    ".join(layout_cases))
+
     return all_fns
+
+
+def get_counter_category_definitions():
+  """Returns definitions related to counter categories."""
+  category_enum = ["typedef enum mali_counter_category_e {"]
+  for cat, index in MALI_COUNTER_CATEGORIES.items():
+    category_enum.append("  MALI_COUNTER_CATEGORY_{} = {},".format(cat, index))
+  category_enum.append("} mali_counter_category_t;")
+  category_enum = "\n".join(category_enum)
+
+  get_category_fn = [
+      "static inline mali_counter_category_t mali_get_counter_category(",
+      "    uint32_t counter) {",
+      "  return counter >> {}u;".format(MALI_COUNTER_CATEGORY_NUM_BITS), "}"
+  ]
+  get_category_fn = "\n".join(get_category_fn)
+  return category_enum + "\n\n" + get_category_fn + "\n\n"
 
 
 def parse_xml_file(xml_path: str) -> MaliDatabase:
@@ -366,10 +407,12 @@ def parse_arguments():
 
 def main(args):
   db = parse_xml_file(args.mali_xml)
-  product_header = os.path.join(args.output, "product.h")
-  update_generated_file(product_header, db.get_counter_layout_enum() + "\n")
-  product_lib = os.path.join(args.output, "product.c")
-  update_generated_file(product_lib, db.get_counter_layout_fn() + "\n")
+  context_header = os.path.join(args.output, "context.h")
+  update_generated_file(context_header, db.get_counter_layout_enum() + "\n")
+  context_lib = os.path.join(args.output, "context.c")
+  update_generated_file(
+      context_lib,
+      db.get_counter_layout_fn() + "\n" + get_counter_category_definitions())
   common_header = os.path.join(args.output, "common.h")
   update_generated_file(common_header, db.get_common_counter_enum() + "\n")
   common_lib = os.path.join(args.output, "common.c")

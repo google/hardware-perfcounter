@@ -18,10 +18,10 @@ hpc_cc_library(
 
 hpc_cc_library(
   NAME
-    product
+    context
   HDRS
-    product.h
+    context.h
   SRCS
-    product.c
+    context.c
 )
 
