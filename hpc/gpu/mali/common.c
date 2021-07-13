@@ -24,7 +24,7 @@ int hpc_gpu_mali_common_create_context(
 int hpc_gpu_mali_common_destroy_context(
     hpc_gpu_mali_context_t *context,
     const hpc_gpu_host_allocation_callbacks_t *allocator) {
-  return hpc_gpu_mali_common_destroy_context(context, allocator);
+  return hpc_gpu_mali_destroy_context(context, allocator);
 }
 
 int hpc_gpu_mali_common_start_counters(hpc_gpu_mali_context_t *context) {

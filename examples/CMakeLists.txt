@@ -30,6 +30,15 @@ if(HPC_ENABLE_GPU_MALI)
 
   hpc_cc_binary(
     NAME
+      mali_common_c_example
+    SRCS
+      mali_common_c_example.c
+    DEPS
+      hpc::gpu::mali::common
+  )
+
+  hpc_cc_binary(
+    NAME
       mali_g77_c_example
     SRCS
       mali_g77_c_example.c
