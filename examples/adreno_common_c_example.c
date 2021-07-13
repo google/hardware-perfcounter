@@ -11,16 +11,25 @@
 static void *allocate(void *user_data, size_t size) { return malloc(size); }
 static void deallocate(void *user_data, void *memory) { return free(memory); }
 
+int print_error(int status, char *message) {
+  if (-status >= HPC_GPU_FIRST_ERROR_CODE) {
+    printf("error %d: %s\n", status, message);
+  } else {
+    perror(message);
+  }
+  return status;
+}
+
 int main(void) {
   int gpu_device = hpc_gpu_adreno_ioctl_open_gpu_device();
-  if (gpu_device < 0) perror("open GPU device");
+  if (gpu_device < 0) return print_error(gpu_device, "open GPU device");
 
   int gpu_id = hpc_gpu_adreno_ioctl_get_gpu_device_id(gpu_device);
-  if (gpu_id < 0) perror("query GPU ID");
+  if (gpu_id < 0) return print_error(gpu_id, "query GPU ID");
   printf("[GPU] Adreno %d\n", gpu_id);
 
   int status = hpc_gpu_adreno_ioctl_close_gpu_device(gpu_device);
-  if (status < 0) perror("close GPU device");
+  if (status < 0) return print_error(status, "close GPU device");
 
   hpc_gpu_adreno_common_perfcounter_t perfcounters[] = {
       HPC_GPU_ADRENO_COMMON_SP_BUSY_CYCLES,
@@ -38,20 +47,10 @@ int main(void) {
                                                    &deallocate};
   status = hpc_gpu_adreno_common_create_context(num_counters, perfcounters,
                                                 &allocator, &context);
-  if (status < 0) {
-    if (-status >= HPC_GPU_FIRST_ERROR_CODE) {
-      printf("create context error: %d\n", status);
-    } else {
-      perror("create context");
-    }
-    return status;
-  }
+  if (status < 0) return print_error(status, "create context");
 
   status = hpc_gpu_adreno_common_start_perfcounters(context);
-  if (status < 0) {
-    perror("start perfcounters");
-    return status;
-  }
+  if (status < 0) return print_error(status, "start perfcounters");
 
   uint64_t values[num_counters];
 
@@ -70,15 +69,10 @@ int main(void) {
   }
 
   status = hpc_gpu_adreno_common_stop_perfcounters(context);
-  if (status < 0) {
-    perror("stop perfcounters");
-    return status;
-  }
+  if (status < 0) return print_error(status, "stop perfcounters");
+
   status = hpc_gpu_adreno_common_destroy_context(context, &allocator);
-  if (status < 0) {
-    perror("destroy context");
-    return status;
-  }
+  if (status < 0) return print_error(status, "destroy context");
 
   return 0;
 }

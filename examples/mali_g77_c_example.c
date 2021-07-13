@@ -9,9 +9,18 @@
 static void *allocate(void *user_data, size_t size) { return malloc(size); }
 static void deallocate(void *user_data, void *memory) { return free(memory); }
 
+int print_error(int status, char *message) {
+  if (-status >= HPC_GPU_FIRST_ERROR_CODE) {
+    printf("error %d: %s\n", status, message);
+  } else {
+    perror(message);
+  }
+  return status;
+}
+
 int main() {
   int gpu_device = hpc_gpu_mali_ioctl_open_gpu_device();
-  if (gpu_device < 0) return perror("open GPU device"), gpu_device;
+  if (gpu_device < 0) return print_error(gpu_device, "open GPU device");
 
   // First negotiate API version with the kernel driver. Feeding in 0.0 means to
   // accept whatever version the kernel driver is at, as it does not really
@@ -20,7 +29,7 @@ int main() {
   uint16_t major_version = 0, minor_version = 0;
   int status = hpc_gpu_mali_ioctl_setup_api_version(gpu_device, &major_version,
                                                     &minor_version);
-  if (status < 0) return perror("setup API version"), status;
+  if (status < 0) return print_error(status, "setup API version");
 
   printf("Kernel API version: %" PRIu16 ".%" PRIu16 "\n", major_version,
          minor_version);
@@ -28,7 +37,7 @@ int main() {
   // Then setup the kernel API context. This is also necessary for future
   // interactions with the kernel driver.
   status = hpc_gpu_mali_ioctl_setup_api_context(gpu_device);
-  if (status < 0) return perror("setup API context"), status;
+  if (status < 0) return print_error(status, "setup API context");
 
   hpc_gpu_host_allocation_callbacks_t allocator = {NULL, &allocate,
                                                    &deallocate};
@@ -36,7 +45,7 @@ int main() {
   hpc_gpu_mali_ioctl_gpu_device_info_t device_info;
   status = hpc_gpu_mali_ioctl_get_gpu_device_info(gpu_device, &allocator,
                                                   &device_info);
-  if (status < 0) return perror("query GPU information"), status;
+  if (status < 0) return print_error(status, "query GPU information");
 
   printf("Product ID: %d\nCore mask: %d\nL2 slice count: %d\n",
          device_info.gpu_product_id, device_info.shader_core_mask,
@@ -45,7 +54,7 @@ int main() {
   hpc_gpu_mali_ioctl_perfcounter_reader_t counter_reader;
   status =
       hpc_gpu_mali_ioctl_open_perfcounter_reader(gpu_device, &counter_reader);
-  if (status < 0) return perror("get counter reader"), status;
+  if (status < 0) return print_error(status, "get counter reader");
 
   printf("Single buffer size: %d\n", counter_reader.single_buffer_size);
 
@@ -59,7 +68,7 @@ int main() {
     uint64_t timestamp = 0;
     status = hpc_gpu_mali_ioctl_query_perfcounters(&counter_reader, values,
                                                    &timestamp);
-    if (status < 0) return perror("sample GPU counters"), status;
+    if (status < 0) return print_error(status, "sample GPU counters");
 
     printf("Timestamp: %" PRIu64 "\n", timestamp);
     for (int j = 0; j < 10; ++j) printf("  %d", values[j]);
@@ -71,10 +80,10 @@ int main() {
   free(values);
 
   status = hpc_gpu_mali_ioctl_close_perfcounter_reader(&counter_reader);
-  if (status < 0) return perror("close counter reader"), status;
+  if (status < 0) return print_error(status, "close counter reader");
 
   status = hpc_gpu_mali_ioctl_close_gpu_device(gpu_device);
-  if (status < 0) return perror("close GPU device"), status;
+  if (status < 0) return print_error(status, "close GPU device");
 
   return 0;
 }
