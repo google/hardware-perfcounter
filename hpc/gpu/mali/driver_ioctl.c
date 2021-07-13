@@ -187,6 +187,8 @@ struct mali_counter_reader_metadata {
   _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x01, uint32_t)
 #define MALI_COUNTER_READER_DUMP \
   _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x10, uint32_t)
+#define MALI_COUNTER_READER_CLEAR \
+  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x11, uint32_t)
 #define MALI_COUNTER_READER_GET_BUFFER       \
   _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x20, \
        struct mali_counter_reader_metadata)
@@ -244,8 +246,14 @@ int hpc_gpu_mali_ioctl_close_perfcounter_reader(
 }
 
 //===----------------------------------------------------------------------===//
-// Get hardware counter reader
+// Query perf counters
 //===----------------------------------------------------------------------===//
+
+int hpc_gpu_mali_ioctl_zero_perfcounters(
+    const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader) {
+  int reader = counter_reader->reader_fd;
+  return ioctl(reader, MALI_COUNTER_READER_CLEAR, 0);
+}
 
 int hpc_gpu_mali_ioctl_query_perfcounters(
     const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader, void *values,

@@ -38,6 +38,9 @@ int hpc_gpu_mali_ioctl_open_perfcounter_reader(
 int hpc_gpu_mali_ioctl_close_perfcounter_reader(
     hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader);
 
+int hpc_gpu_mali_ioctl_zero_perfcounters(
+    const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader);
+
 int hpc_gpu_mali_ioctl_query_perfcounters(
     const hpc_gpu_mali_ioctl_perfcounter_reader_t *counter_reader, void *values,
     uint64_t *timestamp);
