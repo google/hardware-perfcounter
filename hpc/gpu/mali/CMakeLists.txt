@@ -7,3 +7,12 @@ hpc_cc_library(
     driver_ioctl.c
 )
 
+hpc_cc_library(
+  NAME
+    product
+  HDRS
+    product.h
+  SRCS
+    product.c
+)
+
