@@ -5,7 +5,9 @@ import os
 
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Dict, Optional, Sequence, Set, Tuple
+from typing import Dict, Optional, Sequence, Tuple
+
+VERBOSE = False
 
 # Omit Midgard Gen1/Gen2/Gen3 architectures: they are fairly old now.
 PRODUCT_IGNORE_LIST = ["T60x", "T62x", "T72x", "T76x"]
@@ -45,6 +47,24 @@ MALI_COUNTER_ENUM = """
 typedef enum hpc_gpu_mali_{group}_counter_e {{
   {cases}
 }} hpc_gpu_mali_{group}_counter_t;
+"""
+
+MALI_COUNTER_CONVERSION_CASE = "case HPC_GPU_MALI_{group}_{category}_{counter}: return {value};"
+MALI_COUNTER_CONVERSION_SWITCH_FN = """
+static uint32_t hpc_gpu_mali_{group}_counter_convert_to_{layout}(
+    hpc_gpu_mali_{group}_counter_t counter) {{
+  // clang-format off
+  switch (counter) {{
+    {cases}
+  }}
+  // clang-format on
+}}
+"""
+MALI_COUNTER_CONVERSION_DIRECT_FN = """
+static inline uint32_t hpc_gpu_mali_{group}_counter_convert_to_{layout}(
+    hpc_gpu_mali_{group}_counter_t counter) {{
+  return counter & ((1u << {bits}u) - 1u);
+}}
 """
 
 
@@ -120,19 +140,24 @@ class MaliDatabase:
     cases.append(f"return {MALI_LAYOUT_ENUM_PREFIX}UNKNOWN;")
     return MALI_GET_LAYOUT_FN.format(cases="\n  ".join(cases))
 
-  def _get_layouts_for_arch(self, arch: Optional[str] = None) -> Sequence[str]:
+  def _get_layouts_for_arch(self, arch: str) -> Sequence[str]:
     """Gets the layouts for a specific architecture."""
     layouts = []
     for product in self.products:
-      if (product.arch == arch) or (arch is None):
-        layouts.append(product.layout)
+      if (product.arch == arch) or (arch.lower() == "common"):
+        if product.layout not in layouts:
+          layouts.append(product.layout)
     return layouts
 
   def _get_common_counter_for_layouts(
-      self, layouts: Sequence[str]) -> Dict[str, Set[MaliCounter]]:
+      self,
+      layouts: Sequence[str]) -> Tuple[Dict[str, Sequence[MaliCounter]], bool]:
     """Returns a dict containing counters common to all Mali GPUs."""
-    # Convert the (layout -> category) hierarchy into (category -> layout).
     categories = {}
+    # Whether any common counter use the same index for all layouts
+    all_same_index = True
+
+    # Convert the (layout -> category) hierarchy into (category -> layout).
     for layout_name in layouts:
       layout = self.layouts[layout_name]
       for name, category in layout.categories.items():
@@ -146,67 +171,90 @@ class MaliDatabase:
       # Check all counters in the first layout to see whether they exist
       # in other layouts.
       for counter in category[0]:
-        if all([
-            (counter.name in [o.name for o in other]) for other in category[1:]
-        ]):
-          common_counters.append(counter)
+        if not all([(counter.name in [c.name
+                                      for c in layout])
+                    for layout in category[1:]]):
+          continue  # This one is not ubiquitous.
+
+        # Figure out whether the counter has the same index for all layouts.
+        indices = [counter.index]
+        for layout in category[1:]:
+          for c in layout:
+            if c.name == counter.name:
+              indices.append(c.index)
+              break
+        assert len(indices) == len(category), "missing counters in some layout!"
+        same_index = len(set(indices)) == 1
+        all_same_index &= same_index
+        if not same_index and VERBOSE:
+          print(
+              f"{layouts} counter {counter.name} has different indices: {indices}"
+          )
+
+        common_counters.append(counter)
       categories[name] = common_counters
 
-    return categories
+    return categories, all_same_index
 
   def get_common_counter_enum(self) -> str:
     """Returns C enums containing counters common to different GPU classes."""
     all_enums = ""
 
-    counters = []
-    layouts = self._get_layouts_for_arch(None)
-    common_counters = self._get_common_counter_for_layouts(layouts)
-    for name, category in common_counters.items():
-      for counter in category:
-        value = (MALI_COUNTER_CATEGORIES[name] <<
-                 MALI_COUUNTER_CATEGORY_NUM_BITS) + counter.index
-        counters.append(
-            MALI_COUNTER_ENUM_CASE.format(group="COMMON",
-                                          category=name.upper(),
-                                          counter=counter.name,
-                                          value=value))
-    all_enums += MALI_COUNTER_ENUM.format(comment="",
-                                          group="common",
-                                          cases=",\n  ".join(counters))
-
-    counters = []
-    layouts = self._get_layouts_for_arch("valhall")
-    common_counters = self._get_common_counter_for_layouts(layouts)
-    for name, category in common_counters.items():
-      for counter in category:
-        value = (MALI_COUNTER_CATEGORIES[name] <<
-                 MALI_COUUNTER_CATEGORY_NUM_BITS) + counter.index
-        counters.append(
-            MALI_COUNTER_ENUM_CASE.format(group="VALHALL",
-                                          category=name.upper(),
-                                          counter=counter.name,
-                                          value=value))
-    all_enums += MALI_COUNTER_ENUM.format(comment="Valhall ",
-                                          group="valhall",
-                                          cases=",\n  ".join(counters))
-
-    counters = []
-    layouts = self._get_layouts_for_arch("bifrost")
-    common_counters = self._get_common_counter_for_layouts(layouts)
-    for name, category in common_counters.items():
-      for counter in category:
-        value = (MALI_COUNTER_CATEGORIES[name] <<
-                 MALI_COUUNTER_CATEGORY_NUM_BITS) + counter.index
-        counters.append(
-            MALI_COUNTER_ENUM_CASE.format(group="BIFROST",
-                                          category=name.upper(),
-                                          counter=counter.name,
-                                          value=value))
-    all_enums += MALI_COUNTER_ENUM.format(comment="Bifrost ",
-                                          group="bifrost",
-                                          cases=",\n  ".join(counters))
+    for group, comment in [("common", ""), ("valhall", "Valhall "),
+                           ("bifrost", "Bifrost ")]:
+      counters = []
+      layouts = self._get_layouts_for_arch(group)
+      common_counters, _ = self._get_common_counter_for_layouts(layouts)
+      for name, category in common_counters.items():
+        for counter in category:
+          value = (MALI_COUNTER_CATEGORIES[name] <<
+                   MALI_COUUNTER_CATEGORY_NUM_BITS) + counter.index
+          counters.append(
+              MALI_COUNTER_ENUM_CASE.format(group=group.upper(),
+                                            category=name.upper(),
+                                            counter=counter.name,
+                                            value=value))
+      all_enums += MALI_COUNTER_ENUM.format(comment=comment,
+                                            group=group,
+                                            cases=",\n  ".join(counters))
 
     return all_enums
+
+  def get_counter_common_to_specific_fn(self) -> str:
+    """Returns functions that convert common enum counter values to the index
+    for a specific GPU product."""
+    all_fns = ""
+
+    for group in ["common", "valhall", "bifrost"]:
+      layouts = self._get_layouts_for_arch(group)
+      common_counters, same_index = self._get_common_counter_for_layouts(
+          layouts)
+
+      for target_layout in layouts:
+
+        # If for any common counter, it has the same index across all products,
+        # we can just directly extract the index.
+        if same_index:
+          all_fns += MALI_COUNTER_CONVERSION_DIRECT_FN.format(
+              group=group,
+              layout=target_layout.lower(),
+              bits=MALI_COUUNTER_CATEGORY_NUM_BITS)
+          continue
+
+        cases = []
+        for name, category in common_counters.items():
+          for counter in category:
+            cases.append(
+                MALI_COUNTER_CONVERSION_CASE.format(group=group.upper(),
+                                                    category=name.upper(),
+                                                    counter=counter.name,
+                                                    value=counter.index))
+        all_fns += MALI_COUNTER_CONVERSION_SWITCH_FN.format(
+            group=group,
+            layout=target_layout.lower(),
+            cases="\n    ".join(cases))
+
+    return all_fns
 
 
 def parse_xml_file(xml_path: str) -> MaliDatabase:
@@ -324,6 +372,9 @@ def main(args):
   update_generated_file(product_lib, db.get_counter_layout_fn() + "\n")
   common_header = os.path.join(args.output, "common.h")
   update_generated_file(common_header, db.get_common_counter_enum() + "\n")
+  common_lib = os.path.join(args.output, "common.c")
+  update_generated_file(common_lib,
+                        db.get_counter_common_to_specific_fn() + "\n")
 
 
 if __name__ == "__main__":
