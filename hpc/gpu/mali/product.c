@@ -19,10 +19,6 @@ hpc_gpu_mali_counter_layout_t hpc_gpu_mali_get_layout(uint16_t gpu_id) {
   if ((gpu_id & 0xffffu) == 0x0860u) return HPC_GPU_MALI_COUNTER_LAYOUT_T86X;
   if ((gpu_id & 0xffffu) == 0x0830u) return HPC_GPU_MALI_COUNTER_LAYOUT_T83X;
   if ((gpu_id & 0xffffu) == 0x0820u) return HPC_GPU_MALI_COUNTER_LAYOUT_T82X;
-  if ((gpu_id & 0xffffu) == 0x0750u) return HPC_GPU_MALI_COUNTER_LAYOUT_T76X;
-  if ((gpu_id & 0xffffu) == 0x0720u) return HPC_GPU_MALI_COUNTER_LAYOUT_T72X;
-  if ((gpu_id & 0xffffu) == 0x0620u) return HPC_GPU_MALI_COUNTER_LAYOUT_T62X;
-  if ((gpu_id & 0xffffu) == 0x6956u) return HPC_GPU_MALI_COUNTER_LAYOUT_T60X;
   return HPC_GPU_MALI_COUNTER_LAYOUT_UNKNOWN;
 }
 

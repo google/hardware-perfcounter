@@ -15,10 +15,6 @@ hpc_gpu_mali_counter_layout_t hpc_gpu_mali_get_layout(uint16_t gpu_id);
 /// Mali GPU counter layout schemes.
 typedef enum hpc_gpu_mali_counter_layout_e {
   HPC_GPU_MALI_COUNTER_LAYOUT_UNKNOWN,
-  HPC_GPU_MALI_COUNTER_LAYOUT_T60X,
-  HPC_GPU_MALI_COUNTER_LAYOUT_T62X,
-  HPC_GPU_MALI_COUNTER_LAYOUT_T72X,
-  HPC_GPU_MALI_COUNTER_LAYOUT_T76X,
   HPC_GPU_MALI_COUNTER_LAYOUT_T82X,
   HPC_GPU_MALI_COUNTER_LAYOUT_T83X,
   HPC_GPU_MALI_COUNTER_LAYOUT_T86X,
