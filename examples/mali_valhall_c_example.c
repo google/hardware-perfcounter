@@ -20,13 +20,13 @@ int print_error(int status, char *message) {
 }
 
 int main() {
-  hpc_gpu_mali_common_counter_t counters[] = {
-      HPC_GPU_MALI_COMMON_JOB_MANAGER_GPU_ACTIVE,
-      HPC_GPU_MALI_COMMON_MEMORY_L2_ANY_LOOKUP,
-      HPC_GPU_MALI_COMMON_MEMORY_L2_EXT_READ,
-      HPC_GPU_MALI_COMMON_MEMORY_L2_EXT_WRITE,
-      HPC_GPU_MALI_COMMON_SHADER_CORE_COMPUTE_ACTIVE,
-      HPC_GPU_MALI_COMMON_SHADER_CORE_COMPUTE_TASKS,
+  hpc_gpu_mali_valhall_counter_t counters[] = {
+      HPC_GPU_MALI_VALHALL_JOB_MANAGER_GPU_ACTIVE,
+      HPC_GPU_MALI_VALHALL_MEMORY_L2_ANY_LOOKUP,
+      HPC_GPU_MALI_VALHALL_MEMORY_MMU_HIT_L2,  // Valhall specific
+      HPC_GPU_MALI_VALHALL_MEMORY_MMU_HIT_L3,  // Valhall specific
+      HPC_GPU_MALI_VALHALL_SHADER_CORE_COMPUTE_ACTIVE,
+      HPC_GPU_MALI_VALHALL_SHADER_CORE_EXEC_INSTR_FMA,  // Valhall specific
   };
 
   uint32_t num_counters = sizeof(counters) / sizeof(counters[0]);
@@ -35,11 +35,11 @@ int main() {
                                                    &deallocate};
 
   hpc_gpu_mali_context_t *context = NULL;
-  int status = hpc_gpu_mali_common_create_context(num_counters, counters,
-                                                  &allocator, &context);
+  int status = hpc_gpu_mali_valhall_create_context(num_counters, counters,
+                                                   &allocator, &context);
   if (status < 0) return print_error(status, "crate context");
 
-  status = hpc_gpu_mali_common_start_counters(context);
+  status = hpc_gpu_mali_valhall_start_counters(context);
   if (status < 0) return print_error(status, "start counters");
 
   uint64_t values[num_counters];
@@ -49,19 +49,19 @@ int main() {
   sleep_time.tv_nsec = 100000000;  // 100ms
 
   for (int i = 0; i < 100; ++i) {
-    status = hpc_gpu_mali_common_query_counters(context, values);
+    status = hpc_gpu_mali_valhall_query_counters(context, values);
     if (status < 0) return print_error(status, "sample GPU counters");
     printf("  gpu-active=%" PRId64 ", l2-lookup=%" PRId64
-           ", l2-miss=[read=%" PRId64 ", write=%" PRId64
-           "], compute-active=%" PRId64 ", compute-tasks=%" PRId64 "\n",
+           ", mmu-hit=[l2=%" PRId64 ", l3=%" PRId64 "], compute-active=%" PRId64
+           ", fma-inst=%" PRId64 "\n",
            values[0], values[1], values[2], values[3], values[4], values[5]);
     nanosleep(&sleep_time, &remaining_time);
   }
 
-  status = hpc_gpu_mali_common_stop_counters(context);
+  status = hpc_gpu_mali_valhall_stop_counters(context);
   if (status < 0) return print_error(status, "stop counters");
 
-  status = hpc_gpu_mali_common_destroy_context(context, &allocator);
+  status = hpc_gpu_mali_valhall_destroy_context(context, &allocator);
   if (status < 0) return print_error(status, "destory context");
 
   return 0;
