@@ -5,7 +5,6 @@
 #include <time.h>
 
 #include "hpc/gpu/adreno/common.h"
-#include "hpc/gpu/adreno/driver_ioctl.h"
 #include "hpc/gpu/base_utilities.h"
 
 static void *allocate(void *user_data, size_t size) { return malloc(size); }
@@ -21,16 +20,6 @@ int print_error(int status, char *message) {
 }
 
 int main(void) {
-  int gpu_device = hpc_gpu_adreno_ioctl_open_gpu_device();
-  if (gpu_device < 0) return print_error(gpu_device, "open GPU device");
-
-  int gpu_id = hpc_gpu_adreno_ioctl_get_gpu_device_id(gpu_device);
-  if (gpu_id < 0) return print_error(gpu_id, "query GPU ID");
-  printf("[GPU] Adreno %d\n", gpu_id);
-
-  int status = hpc_gpu_adreno_ioctl_close_gpu_device(gpu_device);
-  if (status < 0) return print_error(status, "close GPU device");
-
   hpc_gpu_adreno_common_counter_t counters[] = {
       HPC_GPU_ADRENO_COMMON_SP_BUSY_CYCLES,
       HPC_GPU_ADRENO_COMMON_SP_VS_INSTRUCTIONS,
@@ -45,8 +34,8 @@ int main(void) {
   hpc_gpu_adreno_context_t *context = NULL;
   hpc_gpu_host_allocation_callbacks_t allocator = {NULL, &allocate,
                                                    &deallocate};
-  status = hpc_gpu_adreno_common_create_context(num_counters, counters,
-                                                &allocator, &context);
+  int status = hpc_gpu_adreno_common_create_context(num_counters, counters,
+                                                    &allocator, &context);
   if (status < 0) return print_error(status, "create context");
 
   status = hpc_gpu_adreno_common_start_counters(context);

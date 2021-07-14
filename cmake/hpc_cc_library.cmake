@@ -8,47 +8,47 @@ include(CMakeParseArguments)
 # Parameters:
 #
 # * NAME: the name of this library
-# * HDRS: the list of public headers for this library
 # * SRCS: the list of source files for this library
-# * DEPS: the list of public libraries that this library depends on
-# * INCLUDES: the list of additional private include directories to this library
-# * COPTS: the list of private compile options
-# * LINKOPTS: the list of private link options
+# * PUBLIC_HEADERS: the list of public headers for this library
+# * PUBLIC_DEPS: the list of public libraries that this library depends on
+# * PRIVATE_INCLUDES: the list of additional private include directories to this library
+# * PRIVATE_COPTS: the list of private compile options
+# * PRIVATE_DEPS: the list of private link options
 function(hpc_cc_library)
   cmake_parse_arguments(
     _RULE
     ""
     "NAME"
-    "HDRS;SRCS;DEPS;INCLUDES;COPTS;LINKOPTS"
+    "PUBLIC_HEADERS;SRCS;PUBLIC_DEPS;PRIVATE_INCLUDES;PRIVATE_COPTS;PRIVATE_DEPS"
     ${ARGN}
   )
 
-  hpc_package_ns(_PACKAGE_NS)
+  hpc_package_ns("lib" "hpc" _PACKAGE_NS)
   # Use fully qualified namespaces for dependencies
-  list(TRANSFORM _RULE_DEPS REPLACE "^::" "${_PACKAGE_NS}::")
-  list(TRANSFORM _RULE_LINKOPTS REPLACE "^::" "${_PACKAGE_NS}::")
+  list(TRANSFORM _RULE_PUBLIC_DEPS REPLACE "^::" "${_PACKAGE_NS}::")
+  list(TRANSFORM _RULE_PRIVATE_DEPS REPLACE "^::" "${_PACKAGE_NS}::")
 
   # Prefix the library with the package name
-  hpc_package_name(_PACKAGE_NAME)
-  set(_NAME "${_PACKAGE_NAME}_${_RULE_NAME}")
+  hpc_package_name("lib" "hpc" _PACKAGE_NAME)
+  set(_NAME "${_PACKAGE_NAME}-${_RULE_NAME}")
 
   add_library(${_NAME})
   # Create an alis library with the namespaced name for dependency reference use
   add_library(${_PACKAGE_NS}::${_RULE_NAME} ALIAS ${_NAME})
 
-  target_sources(${_NAME} PRIVATE ${_RULE_SRCS} ${_RULE_HDRS})
+  target_sources(${_NAME} PRIVATE ${_RULE_SRCS} ${_RULE_PUBLIC_HEADERS})
 
   target_include_directories(${_NAME}
     PUBLIC
-      "$<BUILD_INTERFACE:${HPC_SOURCE_ROOT}>"
+      "$<BUILD_INTERFACE:${HPC_SOURCE_ROOT}>/include"
     PRIVATE
-      "$<BUILD_INTERFACE:${_RULE_INCLUDES}>"
+      "$<BUILD_INTERFACE:${_RULE_PRIVATE_INCLUDES}>"
   )
 
-  target_compile_options(${_NAME} PRIVATE ${_RULE_COPTS})
+  target_compile_options(${_NAME} PRIVATE ${_RULE_PRIVATE_COPTS})
 
   target_link_libraries(${_NAME}
-    PUBLIC ${_RULE_DEPS}
-    PRIVATE ${_RULE_LINKOPTS}
+    PUBLIC ${_RULE_PUBLIC_DEPS}
+    PRIVATE ${_RULE_PRIVATE_DEPS}
   )
 endfunction()

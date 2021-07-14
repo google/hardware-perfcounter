@@ -1,4 +1,4 @@
-#include "hpc/gpu/mali/driver_ioctl.h"
+#include "driver_ioctl.h"
 
 #include <errno.h>
 #include <fcntl.h>

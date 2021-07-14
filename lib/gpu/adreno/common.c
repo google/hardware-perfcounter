@@ -4,7 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "hpc/gpu/adreno/context.h"
+#include "context.h"
 #include "hpc/gpu/base_utilities.h"
 
 static uint32_t adreno_common_counter_get_group(

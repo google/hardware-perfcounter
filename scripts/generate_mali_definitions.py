@@ -397,9 +397,9 @@ def parse_arguments():
       help="Specify the XML file path containing Mali product database")
   parser.add_argument("-o",
                       "--output",
-                      metavar="<autogen-output-directory>",
+                      metavar="<project-root-dir>",
                       required=True,
-                      help="Specify the directory for generated files")
+                      help="Specify the root directory for this project")
   args = parser.parse_args()
 
   return args
@@ -407,15 +407,19 @@ def parse_arguments():
 
 def main(args):
   db = parse_xml_file(args.mali_xml)
-  context_header = os.path.join(args.output, "context.h")
+  header_dir_prefix = ["include", "hpc", "gpu", "mali"]
+  lib_dir_prefix = ["lib", "gpu", "mali"]
+
+  context_header = os.path.join(args.output, *lib_dir_prefix, "context.h")
   update_generated_file(context_header, db.get_counter_layout_enum() + "\n")
-  context_lib = os.path.join(args.output, "context.c")
+  context_lib = os.path.join(args.output, *lib_dir_prefix, "context.c")
   update_generated_file(
       context_lib,
       db.get_counter_layout_fn() + "\n" + get_counter_category_definitions())
-  common_header = os.path.join(args.output, "common.h")
+
+  common_header = os.path.join(args.output, *header_dir_prefix, "common.h")
   update_generated_file(common_header, db.get_common_counter_enum() + "\n")
-  common_lib = os.path.join(args.output, "common.c")
+  common_lib = os.path.join(args.output, *lib_dir_prefix, "common.c")
   update_generated_file(common_lib,
                         db.get_counter_common_to_specific_fn() + "\n")
 

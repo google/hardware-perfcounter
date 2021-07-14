@@ -48,10 +48,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 #===------------------------------------------------------------------------===#
 
 if(HPC_ENABLE_GPU_ADRENO)
-  add_subdirectory(hpc/gpu/adreno)
+  add_subdirectory(lib/gpu/adreno)
 endif()
 if(HPC_ENABLE_GPU_MALI)
-  add_subdirectory(hpc/gpu/mali)
+  add_subdirectory(lib/gpu/mali)
 endif()
 if(HPC_BUILD_EXAMPLES)
   add_subdirectory(examples)

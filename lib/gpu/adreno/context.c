@@ -1,4 +1,4 @@
-#include "hpc/gpu/adreno/context.h"
+#include "context.h"
 
 #include <stdint.h>
 #include <string.h>  // For memset

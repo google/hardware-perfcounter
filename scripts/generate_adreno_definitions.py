@@ -363,28 +363,35 @@ def parse_arguments():
       help="Specify the XML file path containing Adreno A6xx definitions")
   parser.add_argument("-o",
                       "--output",
-                      metavar="<autogen-output-directory>",
+                      metavar="<project-root-dir>",
                       required=True,
-                      help="Specify the directory for generated files")
+                      help="Specify the root directory for the project")
   args = parser.parse_args()
 
   return args
 
 
 def main(args):
+  header_dir_prefix = ["include", "hpc", "gpu", "adreno"]
+  lib_dir_prefix = ["lib", "gpu", "adreno"]
+
   a5xx_definition = parse_xml_file(args.a5xx_xml)
   a5xx_enum = a5xx_definition.get_all_counters_as_one_enum()
-  a5xx_c_header = os.path.join(args.output, a5xx_definition.series + ".h")
+  a5xx_c_header = os.path.join(args.output, *header_dir_prefix,
+                               a5xx_definition.series + ".h")
   update_generated_file(a5xx_c_header, a5xx_enum)
-  a5xx_c_lib = os.path.join(args.output, a5xx_definition.series + ".c")
+  a5xx_c_lib = os.path.join(args.output, *lib_dir_prefix,
+                            a5xx_definition.series + ".c")
   update_generated_file(a5xx_c_lib,
                         a5xx_definition.get_counter_conversion_functions())
 
   a6xx_definition = parse_xml_file(args.a6xx_xml)
   a6xx_enum = a6xx_definition.get_all_counters_as_one_enum()
-  a6xx_c_header = os.path.join(args.output, a6xx_definition.series + ".h")
+  a6xx_c_header = os.path.join(args.output, *header_dir_prefix,
+                               a6xx_definition.series + ".h")
   update_generated_file(a6xx_c_header, a6xx_enum)
-  a6xx_c_lib = os.path.join(args.output, a6xx_definition.series + ".c")
+  a6xx_c_lib = os.path.join(args.output, *lib_dir_prefix,
+                            a6xx_definition.series + ".c")
   update_generated_file(a6xx_c_lib,
                         a6xx_definition.get_counter_conversion_functions())
 
@@ -393,11 +400,13 @@ def main(args):
 
   common_definition = all_series.get_common_series()
   common_enum = common_definition.get_all_counters_as_one_enum()
-  common_c_header = os.path.join(args.output, common_definition.series + ".h")
+  common_c_header = os.path.join(args.output, *header_dir_prefix,
+                                 common_definition.series + ".h")
   update_generated_file(common_c_header, common_enum)
 
   functions = all_series.get_counter_conversion_functions()
-  common_c_lib = os.path.join(args.output, common_definition.series + ".c")
+  common_c_lib = os.path.join(args.output, *lib_dir_prefix,
+                              common_definition.series + ".c")
   update_generated_file(common_c_lib, functions)
 
 

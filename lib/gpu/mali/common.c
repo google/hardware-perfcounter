@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdint.h>
 
-#include "hpc/gpu/mali/context.h"
+#include "context.h"
 
 static uint32_t hpc_gpu_mali_common_counter_convert(
     uint32_t counter, hpc_gpu_mali_counter_layout_t layout);

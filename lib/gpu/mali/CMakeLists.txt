@@ -1,31 +1,29 @@
 hpc_cc_library(
   NAME
     common
-  HDRS
+  PUBLIC_HDRS
     common.h
   SRCS
     common.c
-  LINKOPTS
+  PRIVATE_DEPS
     ::context
 )
 
 hpc_cc_library(
   NAME
-    driver_ioctl
-  HDRS
-    driver_ioctl.h
+    driver-ioctl
   SRCS
+    driver_ioctl.h
     driver_ioctl.c
 )
 
 hpc_cc_library(
   NAME
     context
-  HDRS
-    context.h
   SRCS
+    context.h
     context.c
-  LINKOPTS
-    ::driver_ioctl
+  PRIVATE_DEPS
+    ::driver-ioctl
 )
 

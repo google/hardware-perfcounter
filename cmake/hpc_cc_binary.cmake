@@ -21,13 +21,13 @@ function(hpc_cc_binary)
     ${ARGN}
   )
 
-  hpc_package_ns(_PACKAGE_NS)
+  hpc_package_ns("" "" _PACKAGE_NS)
   # Use fully qualified namespaces for dependencies
   list(TRANSFORM _RULE_DEPS REPLACE "^::" "${_PACKAGE_NS}::")
 
   # Prefix the library with the package name
-  hpc_package_name(_PACKAGE_NAME)
-  set(_NAME "${_PACKAGE_NAME}_${_RULE_NAME}")
+  hpc_package_name("" "" _PACKAGE_NAME)
+  set(_NAME "${_PACKAGE_NAME}-${_RULE_NAME}")
 
   add_executable(${_NAME} "")
   # Create an alias executable for the original given name
@@ -39,7 +39,7 @@ function(hpc_cc_binary)
 
   target_include_directories(${_NAME}
     PRIVATE
-      "$<BUILD_INTERFACE:${HPC_SOURCE_ROOT}>"
+      "$<BUILD_INTERFACE:${HPC_SOURCE_ROOT}>/include"
       "$<BUILD_INTERFACE:${_RULE_INCLUDES}>"
   )
 

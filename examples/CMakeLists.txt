@@ -6,7 +6,6 @@ if(HPC_ENABLE_GPU_ADRENO)
       adreno_common_c_example.c
     DEPS
       hpc::gpu::adreno::common
-      hpc::gpu::adreno::driver_ioctl
   )
 
   hpc_cc_binary(
@@ -16,7 +15,6 @@ if(HPC_ENABLE_GPU_ADRENO)
       adreno_a6xx_c_example.c
     DEPS
       hpc::gpu::adreno::a6xx
-      hpc::gpu::adreno::driver_ioctl
   )
 endif(HPC_ENABLE_GPU_ADRENO)
 

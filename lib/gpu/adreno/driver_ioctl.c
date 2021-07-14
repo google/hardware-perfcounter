@@ -1,4 +1,4 @@
-#include "hpc/gpu/adreno/driver_ioctl.h"
+#include "driver_ioctl.h"
 
 #include <assert.h>
 #include <fcntl.h>

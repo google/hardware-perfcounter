@@ -1,11 +1,11 @@
-#include "hpc/gpu/mali/context.h"
+#include "context.h"
 
 #include <stdint.h>
 #include <string.h>
 #include <unistd.h>  // For close
 
+#include "driver_ioctl.h"
 #include "hpc/gpu/base_utilities.h"
-#include "hpc/gpu/mali/driver_ioctl.h"
 
 const uint32_t NUM_COUNTERS_PER_CATEGORY = 64;
 

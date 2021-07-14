@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#include "hpc/gpu/adreno/driver_ioctl.h"
+#include "driver_ioctl.h"
 #include "hpc/gpu/base_utilities.h"
 
 /// Adreno GPU series.
