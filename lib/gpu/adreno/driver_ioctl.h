@@ -3,6 +3,10 @@
 
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 /// Opens the Adreno GPU device in the current system.
 int hpc_gpu_adreno_ioctl_open_gpu_device(void);
 
@@ -50,5 +54,9 @@ typedef struct hpc_gpu_adreno_ioctl_counter_read_counter_t {
 int hpc_gpu_adreno_ioctl_query_counters(
     int gpu_device, uint32_t num_counters,
     hpc_gpu_adreno_ioctl_counter_read_counter_t *counters, uint64_t *values);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // HPC_GPU_ADRENO_DRIVER_IOCTL_H_

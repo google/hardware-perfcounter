@@ -6,6 +6,10 @@
 #include "driver_ioctl.h"
 #include "hpc/gpu/base_utilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 /// Adreno GPU series.
 typedef enum hpc_gpu_adreno_series_e {
   HPC_GPU_ADRENO_SERIES_UNKNOWN,
@@ -86,5 +90,9 @@ int hpc_gpu_adreno_context_stop_counters(
 ///                     creating the `context`.
 int hpc_gpu_adreno_context_query_counters(hpc_gpu_adreno_context_t *context,
                                           uint64_t *values);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // HPC_GPU_ADRENO_CONTEXT_H_

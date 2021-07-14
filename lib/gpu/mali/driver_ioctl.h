@@ -5,6 +5,10 @@
 
 #include "hpc/gpu/base_utilities.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 /// Opens the Mali GPU device in the current system.
 int hpc_gpu_mali_ioctl_open_gpu_device(void);
 
@@ -99,5 +103,9 @@ int hpc_gpu_mali_ioctl_zero_counters(
 int hpc_gpu_mali_ioctl_query_counters(
     const hpc_gpu_mali_ioctl_counter_reader_t *counter_reader, uint32_t *values,
     uint64_t *timestamp);
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // HPC_GPU_MALI_DRIVER_IOCTL_H_

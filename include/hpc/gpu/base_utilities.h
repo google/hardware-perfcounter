@@ -3,6 +3,10 @@
 
 #include <stddef.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif  // __cplusplus
+
 /// Error codes used by this library.
 ///
 /// This library is a low-level library that directly talks with GPU Kernel
@@ -34,5 +38,9 @@ typedef struct hpc_gpu_host_allocation_callbacks_t {
   hpc_gpu_host_alloc_function alloc;
   hpc_gpu_host_free_function free;
 } hpc_gpu_host_allocation_callbacks_t;
+
+#ifdef __cplusplus
+}  // extern "C"
+#endif  // __cplusplus
 
 #endif  // HPC_GPU_ALLOCATION_CALLBACK_H_
