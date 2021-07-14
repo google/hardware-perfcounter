@@ -14,19 +14,53 @@ typedef enum hpc_gpu_mali_bifrost_counter_t_counter_e
 /// The context for sampling Mali GPU counters.
 typedef struct hpc_gpu_mali_context_t hpc_gpu_mali_context_t;
 
+/// Creates a context for sampling counters available to all known Mali GPUs.
+///
+/// Creating the context means talking with the Mali GPU kernel driver and
+/// allocating resources for sampling the given counters.
+///
+/// @param[in]  num_counters The number of counters to sample later.
+/// @param[in]  counters     The pointer to the list of counters to sample
+///                          later.
+/// @param[in]  allocator    The allocator used to allocate host memory for
+///                          sampling counters later.
+/// @param[out] out_context  The pointer to the object receiving the resultant
+///                          context.
 int hpc_gpu_mali_common_create_context(
     uint32_t num_counters, hpc_gpu_mali_common_counter_t *counters,
     const hpc_gpu_host_allocation_callbacks_t *allocator,
     hpc_gpu_mali_context_t **out_context);
 
+/// Destroys the context for common Mali GPU counters.
+///
+/// @param[in] context   The counter sampling context.
+/// @param[in] allocator The allocator used to free allocated host memory.
 int hpc_gpu_mali_common_destroy_context(
     hpc_gpu_mali_context_t *context,
     const hpc_gpu_host_allocation_callbacks_t *allocator);
 
+/// Starts sampling the common Mali GPU counters specified when creating
+/// the context.
+///
+/// This zeros the registered counters in preparation for continously sampling.
+///
+/// @param[in] context The counter sampling context.
 int hpc_gpu_mali_common_start_counters(hpc_gpu_mali_context_t *context);
 
+/// Stops sampling the common Mali GPU counters specified when creating
+/// the context.
+///
+/// @param[in] context The counter sampling context.
 int hpc_gpu_mali_common_stop_counters(hpc_gpu_mali_context_t *context);
 
+/// Samples the common Mali GPU counters specified when creating
+/// the context.
+///
+/// @param[in]  context The counter sampling context.
+/// @param[out] values  The pointer to the memory for receiving newly sampled
+///                     values. Its element count should be greater than or
+///                     equal to the number of counters specified when
+///                     creating the `context`.
 int hpc_gpu_mali_common_query_counters(hpc_gpu_mali_context_t *context,
                                        uint64_t *values);
 

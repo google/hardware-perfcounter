@@ -256,7 +256,7 @@ int hpc_gpu_mali_ioctl_zero_counters(
 }
 
 int hpc_gpu_mali_ioctl_query_counters(
-    const hpc_gpu_mali_ioctl_counter_reader_t *counter_reader, void *values,
+    const hpc_gpu_mali_ioctl_counter_reader_t *counter_reader, uint32_t *values,
     uint64_t *timestamp) {
   int reader = counter_reader->reader_fd;
   int status = ioctl(reader, MALI_COUNTER_READER_DUMP, 0);

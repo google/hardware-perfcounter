@@ -6,7 +6,7 @@
 /// Opens the Adreno GPU device in the current system.
 int hpc_gpu_adreno_ioctl_open_gpu_device(void);
 
-/// Closes the Adreno GPU device.
+/// Closes the given Adreno GPU device.
 ///
 /// @param[in] gpu_device The file descriptor for the GPU device.
 int hpc_gpu_adreno_ioctl_close_gpu_device(int gpu_device);

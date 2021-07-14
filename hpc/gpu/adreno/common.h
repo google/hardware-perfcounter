@@ -8,14 +8,12 @@
 // Forward declaration of the counter enum
 typedef enum hpc_gpu_adreno_common_counter_e hpc_gpu_adreno_common_counter_t;
 
-/// The context for common Adreno GPU counters.
-///
-/// Common counters mean counters available to all known Adreno GPUs.
+/// The context for sampling Adreno GPU counters.
 typedef struct hpc_gpu_adreno_context_t hpc_gpu_adreno_context_t;
 
-/// Creates a context for common Adreno GPU counters.
+/// Creates a context for sampling counters available to all known Adreno GPUs.
 ///
-/// Creating the context means talking with the Adreno kernel GPU driver and
+/// Creating the context means talking with the Adreno GPU kernel driver and
 /// allocating resources for sampling the given counters.
 ///
 /// @param[in]  num_counters The number of counters to sample later.
