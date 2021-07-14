@@ -14,11 +14,12 @@ include(CMakeParseArguments)
 # * PRIVATE_INCLUDES: the list of additional private include directories to this library
 # * PRIVATE_COPTS: the list of private compile options
 # * PRIVATE_DEPS: the list of private link options
+# * INSTALL_COMPONENT: the installation component this target belongs to
 function(hpc_cc_library)
   cmake_parse_arguments(
     _RULE
     ""
-    "NAME"
+    "NAME;INSTALL_COMPONENT"
     "PUBLIC_HEADERS;SRCS;PUBLIC_DEPS;PRIVATE_INCLUDES;PRIVATE_COPTS;PRIVATE_DEPS"
     ${ARGN}
   )
@@ -31,10 +32,11 @@ function(hpc_cc_library)
   # Prefix the library with the package name
   hpc_package_name("lib" "hpc" _PACKAGE_NAME)
   set(_NAME "${_PACKAGE_NAME}-${_RULE_NAME}")
+  set(_ALIAS_NAME "${_PACKAGE_NS}::${_RULE_NAME}")
 
   add_library(${_NAME})
   # Create an alis library with the namespaced name for dependency reference use
-  add_library(${_PACKAGE_NS}::${_RULE_NAME} ALIAS ${_NAME})
+  add_library(${_ALIAS_NAME} ALIAS ${_NAME})
 
   target_sources(${_NAME} PRIVATE ${_RULE_SRCS} ${_RULE_PUBLIC_HEADERS})
 
@@ -50,5 +52,12 @@ function(hpc_cc_library)
   target_link_libraries(${_NAME}
     PUBLIC ${_RULE_PUBLIC_DEPS}
     PRIVATE ${_RULE_PRIVATE_DEPS}
+  )
+
+  install(TARGETS ${_NAME}
+    EXPORT hpc-lib-targets
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
+    COMPONENT ${_RULE_INSTALL_COMPONENT}
   )
 endfunction()

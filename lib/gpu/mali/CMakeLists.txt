@@ -7,6 +7,8 @@ hpc_cc_library(
     common.c
   PRIVATE_DEPS
     ::context
+  INSTALL_COMPONENT
+    MaliGPU
 )
 
 hpc_cc_library(
@@ -18,6 +20,8 @@ hpc_cc_library(
     valhall.c
   PRIVATE_DEPS
     ::context
+  INSTALL_COMPONENT
+    MaliGPU
 )
 
 hpc_cc_library(
@@ -29,6 +33,8 @@ hpc_cc_library(
     bifrost.c
   PRIVATE_DEPS
     ::context
+  INSTALL_COMPONENT
+    MaliGPU
 )
 
 hpc_cc_library(
@@ -37,6 +43,8 @@ hpc_cc_library(
   SRCS
     driver_ioctl.h
     driver_ioctl.c
+  INSTALL_COMPONENT
+    MaliGPU
 )
 
 hpc_cc_library(
@@ -47,5 +55,7 @@ hpc_cc_library(
     context.c
   PRIVATE_DEPS
     ::driver-ioctl
+  INSTALL_COMPONENT
+    MaliGPU
 )
 
