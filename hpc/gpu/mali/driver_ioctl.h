@@ -81,7 +81,7 @@ int hpc_gpu_mali_ioctl_open_counter_reader(
 
 /// Closes the given counter reader.
 int hpc_gpu_mali_ioctl_close_counter_reader(
-    hpc_gpu_mali_ioctl_counter_reader_t *counter_reader);
+    const hpc_gpu_mali_ioctl_counter_reader_t *counter_reader);
 
 /// Zeros all counters in the given counter reader.
 int hpc_gpu_mali_ioctl_zero_counters(

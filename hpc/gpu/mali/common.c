@@ -27,15 +27,15 @@ int hpc_gpu_mali_common_destroy_context(
   return hpc_gpu_mali_destroy_context(context, allocator);
 }
 
-int hpc_gpu_mali_common_start_counters(hpc_gpu_mali_context_t *context) {
+int hpc_gpu_mali_common_start_counters(const hpc_gpu_mali_context_t *context) {
   return hpc_gpu_mali_context_start_counters(context);
 }
 
-int hpc_gpu_mali_common_stop_counters(hpc_gpu_mali_context_t *context) {
+int hpc_gpu_mali_common_stop_counters(const hpc_gpu_mali_context_t *context) {
   return hpc_gpu_mali_context_stop_counters(context);
 }
 
-int hpc_gpu_mali_common_query_counters(hpc_gpu_mali_context_t *context,
+int hpc_gpu_mali_common_query_counters(const hpc_gpu_mali_context_t *context,
                                        uint64_t *values) {
   return hpc_gpu_mali_context_query_counters(context, values);
 }

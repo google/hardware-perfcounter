@@ -43,7 +43,8 @@ int hpc_gpu_adreno_common_destroy_context(
 /// preparation for continously sampling.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_adreno_common_start_counters(hpc_gpu_adreno_context_t *context);
+int hpc_gpu_adreno_common_start_counters(
+    const hpc_gpu_adreno_context_t *context);
 
 /// Stops sampling the common Adreno GPU counters specified when creating
 /// the context.
@@ -51,7 +52,8 @@ int hpc_gpu_adreno_common_start_counters(hpc_gpu_adreno_context_t *context);
 /// This deactivates the registered counters.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_adreno_common_stop_counters(hpc_gpu_adreno_context_t *context);
+int hpc_gpu_adreno_common_stop_counters(
+    const hpc_gpu_adreno_context_t *context);
 
 /// Samples the common Adreno GPU counters specified when creating
 /// the context.

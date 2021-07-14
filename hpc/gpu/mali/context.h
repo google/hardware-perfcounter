@@ -33,6 +33,7 @@ typedef enum hpc_gpu_mali_counter_layout_e {
 /// @param[in] gpu_id The GPU ID number reported by Mali kernel driver.
 hpc_gpu_mali_counter_layout_t hpc_gpu_mali_get_counter_layout(uint16_t gpu_id);
 
+/// Mali counter sampling context.
 typedef struct hpc_gpu_mali_context_t hpc_gpu_mali_context_t;
 
 /// Function pointer for converting a counter enum value to counter index in the
@@ -68,12 +69,12 @@ int hpc_gpu_mali_destroy_context(
 /// This zeros the registered counters in preparation for continously sampling.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_mali_context_start_counters(hpc_gpu_mali_context_t *context);
+int hpc_gpu_mali_context_start_counters(const hpc_gpu_mali_context_t *context);
 
 /// Stops sampling Mali GPU counters specified when creating the context.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_mali_context_stop_counters(hpc_gpu_mali_context_t *context);
+int hpc_gpu_mali_context_stop_counters(const hpc_gpu_mali_context_t *context);
 
 /// Samples Mali GPU counters specified when creating the context.
 ///
@@ -82,7 +83,7 @@ int hpc_gpu_mali_context_stop_counters(hpc_gpu_mali_context_t *context);
 ///                     values. Its element count should be greater than or
 ///                     equal to the number of counters specified when
 ///                     creating the `context`.
-int hpc_gpu_mali_context_query_counters(hpc_gpu_mali_context_t *context,
+int hpc_gpu_mali_context_query_counters(const hpc_gpu_mali_context_t *context,
                                         uint64_t *values);
 
 #endif  // HPC_GPU_MALI_CONTEXT_H_

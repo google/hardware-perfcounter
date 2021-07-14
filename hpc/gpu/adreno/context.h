@@ -20,7 +20,7 @@ typedef enum hpc_gpu_adreno_series_e {
 /// @param[in] gpu_id The GPU ID (e.g., 540, 650, etc.)
 hpc_gpu_adreno_series_t hpc_gpu_adreno_get_series(int gpu_id);
 
-/// Adreno counter context.
+/// Adreno counter sampling context.
 typedef struct hpc_gpu_adreno_context_t {
   /// The list of counters to sample.
   hpc_gpu_adreno_ioctl_counter_read_counter_t *counters;
@@ -66,14 +66,16 @@ int hpc_gpu_adreno_destroy_context(
 /// preparation for continously sampling.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_adreno_context_start_counters(hpc_gpu_adreno_context_t *context);
+int hpc_gpu_adreno_context_start_counters(
+    const hpc_gpu_adreno_context_t *context);
 
 /// Stops sampling Adreno GPU counters specified when creating the context.
 ///
 /// This deactivates the registered counters.
 ///
 /// @param[in] context The counter sampling context.
-int hpc_gpu_adreno_context_stop_counters(hpc_gpu_adreno_context_t *context);
+int hpc_gpu_adreno_context_stop_counters(
+    const hpc_gpu_adreno_context_t *context);
 
 /// Samples Adreno GPU counters specified when creating the context.
 ///

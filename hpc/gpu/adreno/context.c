@@ -56,7 +56,8 @@ int hpc_gpu_adreno_destroy_context(
   return 0;
 }
 
-int hpc_gpu_adreno_context_start_counters(hpc_gpu_adreno_context_t *context) {
+int hpc_gpu_adreno_context_start_counters(
+    const hpc_gpu_adreno_context_t *context) {
   // Activate all selected counters
   hpc_gpu_adreno_series_t series = hpc_gpu_adreno_get_series(context->gpu_id);
   switch (series) {
@@ -91,7 +92,8 @@ int hpc_gpu_adreno_context_start_counters(hpc_gpu_adreno_context_t *context) {
   return 0;
 }
 
-int hpc_gpu_adreno_context_stop_counters(hpc_gpu_adreno_context_t *context) {
+int hpc_gpu_adreno_context_stop_counters(
+    const hpc_gpu_adreno_context_t *context) {
   hpc_gpu_adreno_series_t series = hpc_gpu_adreno_get_series(context->gpu_id);
   switch (series) {
     case HPC_GPU_ADRENO_SERIES_UNKNOWN:

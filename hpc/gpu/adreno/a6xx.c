@@ -60,11 +60,12 @@ int hpc_gpu_adreno_a6xx_destroy_context(
   return hpc_gpu_adreno_destroy_context(context, allocator);
 }
 
-int hpc_gpu_adreno_a6xx_start_counters(hpc_gpu_adreno_context_t *context) {
+int hpc_gpu_adreno_a6xx_start_counters(
+    const hpc_gpu_adreno_context_t *context) {
   return hpc_gpu_adreno_context_start_counters(context);
 }
 
-int hpc_gpu_adreno_a6xx_stop_counters(hpc_gpu_adreno_context_t *context) {
+int hpc_gpu_adreno_a6xx_stop_counters(const hpc_gpu_adreno_context_t *context) {
   return hpc_gpu_adreno_context_stop_counters(context);
 }
 

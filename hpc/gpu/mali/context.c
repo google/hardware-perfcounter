@@ -171,16 +171,16 @@ int hpc_gpu_mali_destroy_context(
   return 0;
 }
 
-int hpc_gpu_mali_context_start_counters(hpc_gpu_mali_context_t *context) {
+int hpc_gpu_mali_context_start_counters(const hpc_gpu_mali_context_t *context) {
   return hpc_gpu_mali_ioctl_zero_counters(&context->counter_reader);
 }
 
-int hpc_gpu_mali_context_stop_counters(hpc_gpu_mali_context_t *context) {
+int hpc_gpu_mali_context_stop_counters(const hpc_gpu_mali_context_t *context) {
   // Nothing to do.
   return 0;
 }
 
-int hpc_gpu_mali_context_query_counters(hpc_gpu_mali_context_t *context,
+int hpc_gpu_mali_context_query_counters(const hpc_gpu_mali_context_t *context,
                                         uint64_t *values) {
   // Get a new sample of all perf counters.
   uint64_t timestamp = 0;
