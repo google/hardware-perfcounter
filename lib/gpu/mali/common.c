@@ -7,10 +7,6 @@
 
 static uint32_t hpc_gpu_mali_common_counter_convert(
     uint32_t counter, hpc_gpu_mali_counter_layout_t layout);
-static uint32_t hpc_gpu_mali_valhall_counter_convert(
-    uint32_t counter, hpc_gpu_mali_counter_layout_t layout);
-static uint32_t hpc_gpu_mali_bifrost_counter_convert(
-    uint32_t counter, hpc_gpu_mali_counter_layout_t layout);
 
 int hpc_gpu_mali_common_create_context(
     uint32_t num_counters, hpc_gpu_mali_common_counter_t *counters,
@@ -37,34 +33,6 @@ int hpc_gpu_mali_common_stop_counters(const hpc_gpu_mali_context_t *context) {
 
 int hpc_gpu_mali_common_query_counters(const hpc_gpu_mali_context_t *context,
                                        uint64_t *values) {
-  return hpc_gpu_mali_context_query_counters(context, values);
-}
-
-int hpc_gpu_mali_valhall_create_context(
-    uint32_t num_counters, hpc_gpu_mali_valhall_counter_t *counters,
-    const hpc_gpu_host_allocation_callbacks_t *allocator,
-    hpc_gpu_mali_context_t **out_context) {
-  return hpc_gpu_mali_create_context(num_counters, counters,
-                                     hpc_gpu_mali_valhall_counter_convert,
-                                     allocator, out_context);
-}
-
-int hpc_gpu_mali_valhall_destroy_context(
-    hpc_gpu_mali_context_t *context,
-    const hpc_gpu_host_allocation_callbacks_t *allocator) {
-  return hpc_gpu_mali_destroy_context(context, allocator);
-}
-
-int hpc_gpu_mali_valhall_start_counters(const hpc_gpu_mali_context_t *context) {
-  return hpc_gpu_mali_context_start_counters(context);
-}
-
-int hpc_gpu_mali_valhall_stop_counters(const hpc_gpu_mali_context_t *context) {
-  return hpc_gpu_mali_context_stop_counters(context);
-}
-
-int hpc_gpu_mali_valhall_query_counters(const hpc_gpu_mali_context_t *context,
-                                        uint64_t *values) {
   return hpc_gpu_mali_context_query_counters(context, values);
 }
 
@@ -886,84 +854,6 @@ static uint32_t hpc_gpu_mali_common_counter_convert(
     case HPC_GPU_MALI_COUNTER_LAYOUT_TTRX: return hpc_gpu_mali_common_counter_convert_to_ttrx(counter);
     case HPC_GPU_MALI_COUNTER_LAYOUT_TOTX: return hpc_gpu_mali_common_counter_convert_to_totx(counter);
     case HPC_GPU_MALI_COUNTER_LAYOUT_TBOX: return hpc_gpu_mali_common_counter_convert_to_tbox(counter);
-    default: assert(0 && "should not happen!"); return ~0u;
-  }
-  // clang-format on
-}
-
-static inline uint32_t hpc_gpu_mali_valhall_counter_convert_to_tnax(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_valhall_counter_convert_to_ttrx(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_valhall_counter_convert_to_totx(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_valhall_counter_convert_to_tbox(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static uint32_t hpc_gpu_mali_valhall_counter_convert(
-    uint32_t counter, hpc_gpu_mali_counter_layout_t layout) {
-  // clang-format off
-  switch (layout) {
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TNAX: return hpc_gpu_mali_valhall_counter_convert_to_tnax(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TTRX: return hpc_gpu_mali_valhall_counter_convert_to_ttrx(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TOTX: return hpc_gpu_mali_valhall_counter_convert_to_totx(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TBOX: return hpc_gpu_mali_valhall_counter_convert_to_tbox(counter);
-    default: assert(0 && "should not happen!"); return ~0u;
-  }
-  // clang-format on
-}
-
-static inline uint32_t hpc_gpu_mali_bifrost_counter_convert_to_tmix(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_bifrost_counter_convert_to_thex(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_bifrost_counter_convert_to_tdvx(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_bifrost_counter_convert_to_tsix(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_bifrost_counter_convert_to_tgox(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static inline uint32_t hpc_gpu_mali_bifrost_counter_convert_to_tnox(
-    uint32_t counter) {
-  return counter & ((1u << 8u) - 1u);
-}
-
-static uint32_t hpc_gpu_mali_bifrost_counter_convert(
-    uint32_t counter, hpc_gpu_mali_counter_layout_t layout) {
-  // clang-format off
-  switch (layout) {
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TMIX: return hpc_gpu_mali_bifrost_counter_convert_to_tmix(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_THEX: return hpc_gpu_mali_bifrost_counter_convert_to_thex(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TDVX: return hpc_gpu_mali_bifrost_counter_convert_to_tdvx(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TSIX: return hpc_gpu_mali_bifrost_counter_convert_to_tsix(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TGOX: return hpc_gpu_mali_bifrost_counter_convert_to_tgox(counter);
-    case HPC_GPU_MALI_COUNTER_LAYOUT_TNOX: return hpc_gpu_mali_bifrost_counter_convert_to_tnox(counter);
     default: assert(0 && "should not happen!"); return ~0u;
   }
   // clang-format on

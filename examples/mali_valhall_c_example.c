@@ -5,7 +5,7 @@
 #include <time.h>
 
 #include "hpc/gpu/base_utilities.h"
-#include "hpc/gpu/mali/common.h"
+#include "hpc/gpu/mali/valhall.h"
 
 static void *allocate(void *user_data, size_t size) { return malloc(size); }
 static void deallocate(void *user_data, void *memory) { return free(memory); }

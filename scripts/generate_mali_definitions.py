@@ -211,9 +211,9 @@ class MaliDatabase:
 
     return categories, all_same_index
 
-  def get_common_counter_enum(self) -> str:
+  def get_common_counter_enum(self) -> Dict[str, str]:
     """Returns C enums containing counters common to different GPU classes."""
-    all_enums = ""
+    all_enums = {}
 
     for group, comment in [("common", ""), ("valhall", "Valhall "),
                            ("bifrost", "Bifrost ")]:
@@ -229,18 +229,19 @@ class MaliDatabase:
                                             category=name.upper(),
                                             counter=counter.name,
                                             value=value))
-      all_enums += MALI_COUNTER_ENUM.format(comment=comment,
-                                            group=group,
-                                            cases=",\n  ".join(counters))
+      all_enums[group] = MALI_COUNTER_ENUM.format(comment=comment,
+                                                  group=group,
+                                                  cases=",\n  ".join(counters))
 
     return all_enums
 
-  def get_counter_common_to_specific_fn(self) -> str:
+  def get_counter_common_to_specific_fn(self) -> Dict[str, str]:
     """Returns functions that convert common enum counter values to the index
     for a specific GPU product."""
-    all_fns = ""
+    all_fns = {}
 
     for group in ["common", "valhall", "bifrost"]:
+      all_fns[group] = ""
       layouts = self._get_layouts_for_arch(group)
       common_counters, same_index = self._get_common_counter_for_layouts(
           layouts)
@@ -256,7 +257,7 @@ class MaliDatabase:
         # If for any common counter, it has the same index across all products,
         # we can just directly extract the index.
         if same_index:
-          all_fns += MALI_COUNTER_CONVERSION_DIRECT_FN.format(
+          all_fns[group] += MALI_COUNTER_CONVERSION_DIRECT_FN.format(
               group=group,
               layout=target_layout.lower(),
               bits=MALI_COUNTER_CATEGORY_NUM_BITS)
@@ -270,12 +271,12 @@ class MaliDatabase:
                                                     category=name.upper(),
                                                     counter=counter.name,
                                                     value=counter.index))
-        all_fns += MALI_COUNTER_CONVERSION_SWITCH_FN.format(
+        all_fns[group] += MALI_COUNTER_CONVERSION_SWITCH_FN.format(
             group=group,
             layout=target_layout.lower(),
             cases="\n    ".join(cases))
 
-      all_fns += MALI_LAYOUT_CONVERSION_SWITCH_FN.format(
+      all_fns[group] += MALI_LAYOUT_CONVERSION_SWITCH_FN.format(
           group=group, cases="\n    ".join(layout_cases))
 
     return all_fns
@@ -417,11 +418,14 @@ def main(args):
       context_lib,
       db.get_counter_layout_fn() + "\n" + get_counter_category_definitions())
 
-  common_header = os.path.join(args.output, *header_dir_prefix, "common.h")
-  update_generated_file(common_header, db.get_common_counter_enum() + "\n")
-  common_lib = os.path.join(args.output, *lib_dir_prefix, "common.c")
-  update_generated_file(common_lib,
-                        db.get_counter_common_to_specific_fn() + "\n")
+  counter_enums = db.get_common_counter_enum()
+  conversion_fns = db.get_counter_common_to_specific_fn()
+
+  for group in ["common", "valhall", "bifrost"]:
+    common_header = os.path.join(args.output, *header_dir_prefix, f"{group}.h")
+    update_generated_file(common_header, counter_enums[group] + "\n")
+    common_lib = os.path.join(args.output, *lib_dir_prefix, f"{group}.c")
+    update_generated_file(common_lib, conversion_fns[group] + "\n")
 
 
 if __name__ == "__main__":

@@ -38,7 +38,11 @@ if(Python3_Interpreter_FOUND)
   add_custom_command(
     OUTPUT
       "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/common.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/valhall.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/bifrost.h"
       "${HPC_SOURCE_ROOT}/lib/gpu/mali/common.c"
+      "${HPC_SOURCE_ROOT}/lib/gpu/mali/valhall.c"
+      "${HPC_SOURCE_ROOT}/lib/gpu/mali/bifrost.c"
       "${HPC_SOURCE_ROOT}/lib/gpu/mali/context.h"
       "${HPC_SOURCE_ROOT}/lib/gpu/mali/context.c"
     COMMAND
@@ -57,7 +61,11 @@ if(Python3_Interpreter_FOUND)
   add_custom_target(hpc-mali-definitions
     DEPENDS
       "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/common.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/valhall.h"
+      "${HPC_SOURCE_ROOT}/include/hpc/gpu/mali/bifrost.h"
       "${HPC_SOURCE_ROOT}/lib/gpu/mali/common.c"
+      "${HPC_SOURCE_ROOT}/lib/gpu/mali/valhall.c"
+      "${HPC_SOURCE_ROOT}/lib/gpu/mali/bifrost.c"
       "${HPC_SOURCE_ROOT}/lib/gpu/mali/context.h"
       "${HPC_SOURCE_ROOT}/lib/gpu/mali/context.c"
   )

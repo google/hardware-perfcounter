@@ -11,6 +11,28 @@ hpc_cc_library(
 
 hpc_cc_library(
   NAME
+    valhall
+  PUBLIC_HDRS
+    valhall.h
+  SRCS
+    valhall.c
+  PRIVATE_DEPS
+    ::context
+)
+
+hpc_cc_library(
+  NAME
+    bifrost
+  PUBLIC_HDRS
+    bifrost.h
+  SRCS
+    bifrost.c
+  PRIVATE_DEPS
+    ::context
+)
+
+hpc_cc_library(
+  NAME
     driver-ioctl
   SRCS
     driver_ioctl.h

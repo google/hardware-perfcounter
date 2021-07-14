@@ -41,6 +41,6 @@ if(HPC_ENABLE_GPU_MALI)
     SRCS
       mali_valhall_c_example.c
     DEPS
-      hpc::gpu::mali::common
+      hpc::gpu::mali::valhall
   )
 endif(HPC_ENABLE_GPU_MALI)
