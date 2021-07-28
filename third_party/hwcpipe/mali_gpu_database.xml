@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+  This file contains Mali GPU products and performance counters derived from the
+  following files in the HWCPipe project:
+
+  [misc/gator-counter-definitions/MaliHwCntrNames.h](https://github.com/ARM-software/HWCPipe/blob/master/misc/gator-counter-definitions/MaliHwCntrNames.h)
+-->
 <database>
   <products>
     <product name="T60x"  mask="0xffff" id="0x6956" architecture="midgard" layout="T60X" />

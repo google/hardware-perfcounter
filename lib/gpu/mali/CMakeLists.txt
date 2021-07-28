@@ -43,6 +43,8 @@ hpc_cc_library(
   SRCS
     driver_ioctl.h
     driver_ioctl.c
+  PRIVATE_INCLUDES
+    "${HPC_SOURCE_ROOT}/third_party"
   INSTALL_COMPONENT
     MaliGPU
 )

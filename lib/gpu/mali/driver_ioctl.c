@@ -11,6 +11,7 @@
 #include <unistd.h>
 
 #include "hpc/gpu/base_utilities.h"
+#include "hwcpipe/mali_driver_ioctl.h"
 
 //===----------------------------------------------------------------------===//
 // Open/close device
@@ -28,16 +29,6 @@ int hpc_gpu_mali_ioctl_close_gpu_device(int gpu_device) {
 // Setup API
 //===----------------------------------------------------------------------===//
 
-#define MALI_IOCTL_TYPE 0x80
-
-struct mali_device_api_version {
-  uint16_t major;
-  uint16_t minor;
-};
-
-#define MALI_IOCTL_VERSION_HANDSHAKE \
-  _IOWR(MALI_IOCTL_TYPE, 0, struct mali_device_api_version)
-
 int hpc_gpu_mali_ioctl_setup_api_version(int gpu_device,
                                          uint16_t *major_version,
                                          uint16_t *minor_version) {
@@ -51,15 +42,6 @@ int hpc_gpu_mali_ioctl_setup_api_version(int gpu_device,
   return 0;
 }
 
-#define MALI_CONTEXT_DISABLE_SUBMISSION (1u << 1)
-
-struct mali_context_set_creation_flags {
-  uint32_t flags;
-};
-
-#define MALI_IOCTL_SET_CONTEXT_CREATION_FLAGS \
-  _IOW(MALI_IOCTL_TYPE, 1, struct mali_context_set_creation_flags)
-
 int hpc_gpu_mali_ioctl_setup_api_context(int gpu_device) {
   struct mali_context_set_creation_flags flags;
   // We just want to sample counters. So disable submission.
@@ -70,20 +52,6 @@ int hpc_gpu_mali_ioctl_setup_api_context(int gpu_device) {
 //===----------------------------------------------------------------------===//
 // Get device information
 //===----------------------------------------------------------------------===//
-
-#define MALI_PROPERTY_PRODUCT_ID 1
-#define MALI_PROPERTY_NUM_L2_SLICES 15
-#define MALI_PROPERTY_COHERENCY_GROUP_0 64
-#define MALI_PROPERTY_COHERENCY_GROUP_15 79
-
-struct mali_device_get_property {
-  uint64_t buffer;
-  uint32_t buffer_size;
-  uint32_t flags;
-};
-
-#define MALI_IOCTL_DEVICE_GET_ROPERTY \
-  _IOW(MALI_IOCTL_TYPE, 3, struct mali_device_get_property)
 
 int hpc_gpu_mali_ioctl_get_gpu_device_info(
     int gpu_device, const hpc_gpu_host_allocation_callbacks_t *allocator,
@@ -159,44 +127,6 @@ int hpc_gpu_mali_ioctl_get_gpu_device_info(
 //===----------------------------------------------------------------------===//
 // Get hardware counter reader
 //===----------------------------------------------------------------------===//
-
-struct mali_counter_reader_setup {
-  uint32_t buffer_count;
-  uint32_t frontend_bitmask;     // Frontend counter selection bitmask
-  uint32_t shader_core_bitmask;  // Shader core counter selection bitmask
-  uint32_t tiler_bitmask;        // Tiler counter selection bitmask
-  uint32_t mmu_l2_bitmask;       // MMU L2 counter selection bitmask
-};
-
-#define MALI_IOCTL_COUNTER_SETUP_READER \
-  _IOW(MALI_IOCTL_TYPE, 8, struct mali_counter_reader_setup)
-
-struct mali_counter_reader_metadata {
-  uint64_t timestamp;
-  uint32_t event_id;
-  uint32_t buffer_index;
-};
-
-#define MALI_COUNTER_READER_IOCTL_TYPE 0xBE
-
-#define MALI_COUNTER_READER_API_VERSION 1
-
-#define MALI_COUNTER_READER_GET_HARDWARE_VERSION \
-  _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x00, uint32_t)
-#define MALI_COUNTER_READER_GET_BUFFER_SIZE \
-  _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x01, uint32_t)
-#define MALI_COUNTER_READER_DUMP \
-  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x10, uint32_t)
-#define MALI_COUNTER_READER_CLEAR \
-  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x11, uint32_t)
-#define MALI_COUNTER_READER_GET_BUFFER       \
-  _IOR(MALI_COUNTER_READER_IOCTL_TYPE, 0x20, \
-       struct mali_counter_reader_metadata)
-#define MALI_COUNTER_READER_PUT_BUFFER       \
-  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0x21, \
-       struct mali_counter_reader_metadata)
-#define MALI_COUNTER_READER_GET_API_VERSION \
-  _IOW(MALI_COUNTER_READER_IOCTL_TYPE, 0xFF, uint32_t)
 
 int hpc_gpu_mali_ioctl_open_counter_reader(
     int gpu_device, hpc_gpu_mali_ioctl_counter_reader_t *counter_reader) {

@@ -49,12 +49,12 @@ if(Python3_Interpreter_FOUND)
       "${Python3_EXECUTABLE}"
         "${CMAKE_CURRENT_SOURCE_DIR}/generate_mali_definitions.py"
         --mali_xml
-          "${CMAKE_CURRENT_SOURCE_DIR}/mali_gpu_database.xml"
+          "${HPC_SOURCE_ROOT}/third_party/hwcpipe/mali_gpu_database.xml"
         -o
           "${HPC_SOURCE_ROOT}"
     DEPENDS
       "${CMAKE_CURRENT_SOURCE_DIR}/generate_mali_definitions.py"
-      "${CMAKE_CURRENT_SOURCE_DIR}/mali_gpu_database.xml"
+      "${HPC_SOURCE_ROOT}/third_party/hwcpipe/mali_gpu_database.xml"
     COMMENT "Generating Mali definitions"
   )
 
