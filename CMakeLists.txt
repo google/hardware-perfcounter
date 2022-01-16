@@ -110,4 +110,4 @@ export(PACKAGE ${PROJECT_NAME})
 # Utility tools
 #===------------------------------------------------------------------------===#
 
-add_subdirectory(scripts)
+add_subdirectory(scripts EXCLUDE_FROM_ALL)
