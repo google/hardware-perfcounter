@@ -39,6 +39,14 @@ C++ features (STL, exception, etc.) that cannot be configured away.
   integration. There are CMake options for each vendor. There is proper support
   for installation and target import/export.
 
+## Status
+
+Right now only the low level APIs are implemented, which exposes vendor-specific
+counters as is. Such acess will stay as it gives users choice to dive into the
+details.
+
+The next step is to build high level APIs to provide vendor-agonistic counters.
+
 ## Dependencies
 
 This repository requires a common C/C++ project development environment:
